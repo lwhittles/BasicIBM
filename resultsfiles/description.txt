@@ -1,0 +1,7 @@
+Dataset:     Births in England and Wales.
+"Description: These are numbers of births, by year, for all of England and"
+             Wales (male and female births combined).
+"Label i:     Year, relative to 1981 (0=1981)."
+Label y:     Calendar year.
+Label z:     Total births for a given year.
+
