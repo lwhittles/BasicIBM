@@ -1,147 +1,139 @@
 #######################################################################
 
 #######################################################################
-#from multiprocessing import cpu_count
 import traceback
 from numpy import *
 from subprocess import call
-import numpy as np
 import multiprocessing
-import random
-from math import ceil, floor,isnan
 import csv,sys
-from scipy.optimize import leastsq
-import scipy.stats as ss
-from copy import deepcopy
-from time import *
 import time as time
-from copy import copy
-import itertools as IT
-from functools import partial
 
 ################################
 #Wrapper define function to be run
 ################################
 
-mpi=False
+mpi=False # set to True if using a cluster with MPI otherwise False to use python's multiprocessing
 
-n_samples=4 #number of simulations
-pool_size = (multiprocessing.cpu_count())
-if pool_size>n_samples:
-    pool_size = n_samples
+n_jobs=4 #number of simulations
+pool_size = (multiprocessing.cpu_count()) #get the number of available CPUs
+if pool_size>n_jobs:  #only use maximum necessary CPUs depending on number of jobs/runs
+    pool_size = n_jobs
     
 if mpi:
     from mpi4py import MPI
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
+    comm = MPI.COMM_WORLD #communicator so every process can communicate with every other
+    rank = comm.Get_rank() #
     size = comm.Get_size()
-    
-    numberofcases=Nsamples=size
-    #else:
-    numberofcases=Nsamples=int(n_samples)
-	
-    #if rank==0:
-    comm.bcast(numberofcases,root=0)
+
+    #one to many communication
+    comm.bcast(n_jobs,root=0)
     comm.bcast(mpi,root=0)
 else:
-    numberofcases=Nsamples=int(n_samples)                      
-    
+    pass
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-def do_calculation(case):
-    print 'in do_calculation'
+#This function allows the compiled C code to be run
+#in python and take a log of the simulation progress
+# or errors
+def Run_1_simulation(job):
+    print 'in Run_1_simulation'
     write_reports=1
-    if write_reports>0:
+    if write_reports>0: #write output to file instead of terminal
         old = sys.stdout
-        filename='reports/reportfile'+str(case)+'.dat'
+        filename='reports/reportfile'+str(job)+'.dat'#name and open log file for simulation progress and errors
         sys.stdout = open(filename,'w')
-        old.write(`sys.stdout`)        
-    r=case*1
-    j=0
+        old.write(`sys.stdout`)
+    #initialize external function options/parameters
+    r=int(job)#current run/job
+    j=0 #change random number seed/job ID
+    #call the complied C code
     #for cluster exclude .exe        
     call(["./Main_desktop.exe", "fnumber=1"+str(j),\
           "my_id_0="+str(r),"randseq="+str(r)])
     print "finished randseed=",r,"interv=",j
+    #close log files
     if write_reports>0:
         sys.stdout.close()
         sys.stdout = old
         sys.stdout
-        
     return
-def do_calculation_wrapped(args):
-    print 'do_calculation_wrapped'
-    
+##########################################
+#create a wrapper function
+def Run_1_simulation_wrapped(args):
+    print 'Run_1_simulation_wrapped'
     try:
-        return do_calculation(*args)
+        return Run_1_simulation(*args)
     except:
         print('%s' % (traceback.format_exc()))   
 ###############################################
 #set up parallel system
 ###############################################
-start_time = time.time()
+jobs_list = list(range(n_jobs))#create a list of n simulations
 
-cases = list(range(numberofcases))
-
-def start_process():    
+################################################
+#This function initializes multiprocessing    
+def start_process():
     print 'Starting', multiprocessing.current_process().name
-def setup_multiprocess(cases1,mpi):
-    print 'in setup_multiprocess'
-    cases=[] # create tuples to allow multi args for multiprocessing
-    for i in cases1:
-        cases.append((i,))
-    #print cases
-    if mpi:        
+#################################################
+#This function sets up the parallel processes     
+def setup_parallel_process(jobs_list,mpi):
+    print 'in setup_parallel_process'
+    #create tuples to allow multiple args for multiprocessing
+    jobs_tuple=[]
+    for i in jobs_list:
+        jobs_tuple.append((i,))
+    
+    ####################
+    if mpi: #run using MPI        
         import mpi4py_map    
-        mpi4py_map.map(do_calculation_wrapped,cases) #provide parameter values for function f and store any results        
+        mpi4py_map.map(Run_1_simulation_wrapped,jobs_tuple) #provide parameter values for function f and store any results        
         ##############        
-    else:
-        print 'Sending out :', len(cases), 'Jobs to', pool_size,' CPUs using multiprocessing'
+    else:#run using python multiprocessing function
+        print 'Sending out :', len(jobs_tuple), 'Jobs to', pool_size,' CPUs using multiprocessing'
         pool = multiprocessing.Pool(processes=pool_size,
                                     initializer=start_process)        
-        pool.map(do_calculation_wrapped, cases)
+        pool.map(Run_1_simulation_wrapped, jobs_tuple) #map jobs to CPUs
         pool.close() # no more tasks
         pool.join()  # wrap up current tasks
-        #take note of NULL values from failed simulation
-        ##############
-
+        #take note of NULL values are failed simulation
     return 
        
-
 ###############################################
-        
-###############################################
-def solver(n_samples,mpi):
-    print 'in solver'
+#This function runs and stores n simulations
+def Run_n_simulations(n_jobs,mpi):
+    print 'in Run_n_simulations'
     if mpi:
-        call(["sbatch","--nodelist=smedcla[10,14]","run.sh"])#sbatch --nodelist=smedcla[10-14,16-21,23-24,58-60,64-67,73-81]  run.sh
+        call(["sbatch","--nodelist=smedcla[10,14]","run.sh"])
     else:
-        cases = list(range(n_samples))
-        setup_multiprocess(cases,mpi)
-    
+        jobs_list = list(range(n_jobs))
+        setup_parallel_process(jobs_list,mpi)    
     return
 
-def model_summary(n_samples): #summarize results 
-    print 'summrizing model results'
+def summarize_n_simulations(n_jobs): #summarize results 
+    print 'summarizing model results'
+    #initialise summary array
     ylabel=["Year","Total","Deaths","Births","UK born","Non-UK born"]
     basevals = None
     basevals_b = None
     count=0
     i=0
-    for ran in range(0,n_samples):
+    for ran in range(0,n_jobs):#random seed used in nameing result files
+        ##list of all base and interv file for each random seed
         files=[]
-        files+=["summary_1"+str(i)+str(ran)+".txt" ] ##list of all base and interv file for each random seed
+        files+=["summary_1"+str(i)+str(ran)+".txt" ] 
         filename = files[0]
-       
-        basearr = np.genfromtxt(filename, dtype=None, delimiter='\t')
+        #read individual results files
+        basearr = genfromtxt(filename, dtype=None, delimiter='\t')
         if basearr[0][1]>0: #guard against failed simulations
             count+=1
             if basevals_b is None:
                 basevals_b = basearr
             else:
                 basevals_b += basearr
-
-    meanbasevals_b = basevals_b / count   #mean over all simulations  
-
+                
+    #Calculate the mean over all simulations  
+    meanbasevals_b = basevals_b / count   
+    #Write up the summary
     with open('mean_valiables_base.csv', 'wb') as fout:
         writer = csv.writer(fout, delimiter=',', lineterminator='\n')
         writer.writerow(ylabel)
@@ -150,16 +142,22 @@ def model_summary(n_samples): #summarize results
             for y in x:
                  row.append(y)            
             writer.writerow(row)
+    #returning some of the summary results is useful is you are going to
+    #do some model fitting. Note this version does not do any fitting.
     population_size=meanbasevals_b[0][ylabel.index("Total")]
     return array([population_size])
 
 #########################################
 if __name__ == '__main__':
-    ##Initial run to establish starting point
-    solver(n_samples,mpi)
-    soln=model_summary(n_samples)
-    print 'soln',soln
+    #record start time
+    start_time = time.time()#take not of similation start time
+    #run the n parallel jobs
+    Run_n_simulations(n_jobs,mpi)
+    #summarize results
+    soln=summarize_n_simulations(n_jobs)
+    #record end time
     end_time = time.time()
+    #print total duration of simulation
     print("Elapsed time was %g minutess" % ((end_time - start_time)/60.))
  
 

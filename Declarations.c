@@ -100,7 +100,7 @@ dec randseq = 0;               //Random number sequence (set with 'randseq=N').
 dec tgap    = 1;//0.5;             //Time between reports, years.
 dec kernel  = 0;               //Contagion kernel, 0=Panmictic, 1=Cauchy.
 dec sigma   = 1;               //Width of contagion kernel, where applicable.
-
+https://github.com/TendaiMugwagwa/BasicIBM
 //create an output file to store simulation results
 char fnamestem[]="summary";
 dec fnumber=12.;
