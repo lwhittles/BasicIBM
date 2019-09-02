@@ -116,6 +116,7 @@ Dispatch()
   events += 1;                               //Increment the events counter.
   switch(A[n].pending){                      //Process the event.
   case pDeath:    Death(n);        break;    //[death]
+  case pProgress: Progress(n);     break;
   case pBirth:    BirthG();        break;    //[birth generator]
   default: Error2(921.2,                      //[system error]
 		  "`A[",n,"].pending=",A[n].pending);
@@ -255,6 +256,51 @@ Death(int n)
 
   return 1;
 }
+
+
+/*----------------------------------------------------------------------------*
+PROGRESSION
+
+This routine is dispatched when an individual progresses from latent to active disease.
+
+ENTRY: 'n' indexes an individual who has just progressed.
+       't' contains the current time.
+       progression is scheduled for individual 'n'.
+
+EXIT:
+       'progressions' is incremented.
+       Counters in 'A','L' are updated.
+       death from TB or dormancy is scheduled for individual n
+
+*/
+Progress(int n)
+{ int n2,yr,gid,tr,st,q,qv; dec age, mort,wd;
+     A[n].InFunction=fnc_Progress;
+	     st=A[n].strain;
+
+        gid = A[n].groupID;                  // individual's current group ID
+        A[n].state = qATB;                  // update current infection state
+        	age = t-A[n].tBirth;               //Compute the age at progression.
+          s = A[n].sex;
+          mort = 2.0;
+
+
+
+	      progressions += 1;                   //Increment the number of progressions.
+        LTB[gid] -= 1;                           //Decrement the number of Latent
+        ATB[gid] += 1;                          //Increment the number of Actives
+
+
+        te = Expon(mort);           //  calculate time til death from disease
+        wd = t + te;              // calculate calendar date
+        if(wd<A[n].tDeath) {              // if before natural death
+        A[n].tDeath = wd;                  // update time of death
+        A[n].pending = pDeath;              // update pending event
+        EventSchedule(n, wd);         // schedule new death
+      }
+  return 1;
+}
+
 
 /*------------------------------------------------
 This finction checks the population size and increases births to keep it constant
@@ -477,24 +523,29 @@ Report(char *prog)
 
     printf("Label t:	Time, in years and fractions thereof.\n");
     printf("Label N:	Total population size.\n");
+    printf("Label U:	Number uninfected.\n");
+    printf("Label U:	Number latently infected.\n");
+    printf("Label U:	Number actively infected.\n");
     printf("Label Progs: Number of progressions since last report\n");
     printf("Label Deaths:  Number of deaths since last report.\n");
     printf("Label nbirths: Total number of births.\n");
     printf("Label UKborn: Total number of UK born\n");
     printf("Label NUKborn: Total number of non-UK born\n");
 
-    printf("\n t \t  \tN \t  \t Progressions \t   \tDeaths  \tBirths \tUK \tNUK\n");
+    printf("\n t \t  \tN \t  \t  \tU \t  \t L \t \t A \t
+            \t Progressions \t Deaths \tBirths \tUK \tNUK\n");
   }
     //Calculate result summarise
     z1=CCgroup_size(UK);
     z2=CCgroup_size(NUK);
 
    //Write results to screen.
-    printf("%6.1f  \t%d	\t%d  	\t%d \t%d   \t%d  \t%d\n",
-    t, popsize, progressions, deaths, nbirths,z1,z2);
+    printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d  	\t%d \t%d   \t%d  \t%d\n",
+    t, popsize, UTB,LTB, ATB, progressions, deaths, nbirths,z1,z2);
 
   ///Write results to output file which is defined in Declarations.c
-  fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\t%d\n",t, popsize, progressions, deaths, nbirths,z1,z2);
+  fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+    t, popsize, UTB,LTB, ATB,progressions, deaths, nbirths,z1,z2);
 
   fprintf(stderr, "  %.1f\r", t);            //Update status indicator.
   fflush(stdout); fflush(stderr);            //Make sure everything shows.
