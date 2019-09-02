@@ -58,6 +58,9 @@ int repid;                     //Next available ID for 'repc3' case report.
 
 
 int popsize;                   //current population size
+int uninfecteds;
+int actives;
+int latents;
 extern dec t;                  //Current time (Managed by 'EventSchedule').
 dec pt;                        //Time of previous report.
 dec t0 = T0;                   //Beginning time of simulation.

@@ -289,6 +289,8 @@ Progress(int n)
 	      progressions += 1;                   //Increment the number of progressions.
         LTB[gid] -= 1;                           //Decrement the number of Latent
         ATB[gid] += 1;                          //Increment the number of Actives
+        actives +=1;
+        latents -=1;
 
 
         te = Expon(mort);           //  calculate time til death from disease
@@ -501,7 +503,7 @@ EXIT:  The next line of the report has been printed.
 */
 
 static int ReportFirst;
-ReportInit() { ReportFirst = 1; } //To print headers set to 0;
+ReportInit() { ReportFirst = 0; } //To print headers set to 0;
 
 Report(char *prog)
 {
@@ -523,16 +525,16 @@ Report(char *prog)
 
     printf("Label t:	Time, in years and fractions thereof.\n");
     printf("Label N:	Total population size.\n");
-    printf("Label U:	Number uninfected.\n");
-    printf("Label U:	Number latently infected.\n");
-    printf("Label U:	Number actively infected.\n");
+    printf("Label UTB:	Number uninfected.\n");
+    printf("Label LTB:	Number latently infected.\n");
+    printf("Label ATB:	Number actively infected.\n");
     printf("Label Progs: Number of progressions since last report\n");
     printf("Label Deaths:  Number of deaths since last report.\n");
     printf("Label nbirths: Total number of births.\n");
     printf("Label UKborn: Total number of UK born\n");
     printf("Label NUKborn: Total number of non-UK born\n");
 
-    printf("\n t \t  \tN \t  \t  \tU \t  \t L \t \t A \t
+    printf("\n t \t  \tN \t  \t  \tUTB \t  \t LTB \t \t ATB \t
             \t Progressions \t Deaths \tBirths \tUK \tNUK\n");
   }
     //Calculate result summarise
@@ -541,11 +543,11 @@ Report(char *prog)
 
    //Write results to screen.
     printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d  	\t%d \t%d   \t%d  \t%d\n",
-    t, popsize, UTB,LTB, ATB, progressions, deaths, nbirths,z1,z2);
+    t, popsize, uninfecteds,latents, actives, progressions, deaths, nbirths,z1,z2);
 
   ///Write results to output file which is defined in Declarations.c
   fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
-    t, popsize, UTB,LTB, ATB,progressions, deaths, nbirths,z1,z2);
+    t, popsize, uninfecteds,latents, actives,progressions, deaths, nbirths,z1,z2);
 
   fprintf(stderr, "  %.1f\r", t);            //Update status indicator.
   fflush(stdout); fflush(stderr);            //Make sure everything shows.
