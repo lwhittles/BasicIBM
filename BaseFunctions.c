@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------*
+ /*----------------------------------------------------------------------------*
 CHECK ALL EVENTS
 
 This routine find the ealiest event for individual n and schedules it.
@@ -19,9 +19,9 @@ This routing initializes binding lists in A
 */
 InitAbinds(int n){
   A[n].bto[0]=0;
-  A[n].bto[1]=0;	
-  A[n].bfrom[0]=0;	
-  A[n].bfrom[1]=0;	
+  A[n].bto[1]=0;
+  A[n].bfrom[0]=0;
+  A[n].bfrom[1]=0;
 	return 1;
 }
 /*----------------------------------------------------------------------------*
@@ -30,8 +30,8 @@ SEARCH
 This routine finds the current location on array A of an individual with an ID
 number n.
 
-ENTRY: 'id' id number for the indidivual 
-EXIT:  'i' index of individual on array A 
+ENTRY: 'id' id number for the indidivual
+EXIT:  'i' index of individual on array A
 
 */
 Find_individual(id)
@@ -57,7 +57,7 @@ EXIT:  'm' is the new index number of the individual.
        The old and new group counters are updated
        The funtion returns the new index of the individual
 */
-     
+
 TransferGroup(int n, int grp)
 {//printf("Starting TransferGroup()...\n"); fflush(stdout);
      A[n].InFunction=fnc_TransferGroup;
@@ -75,7 +75,7 @@ TransferGroup(int n, int grp)
   	A[m].groupID = grp;   //Update the group ID
      CCdel(A[n].groupID,n);//Remove duplicate individual from old group
      N[A[m].groupID] += 1;
-    return m;	
+    return m;
   	}
 
 /*----------------------------------------------------------------------------*
@@ -99,10 +99,10 @@ Transfer(int n, int n0)
 {//printf("Starting Transfer()...\n"); fflush(stdout);
 A[n].InFunction=fnc_Transfer;
   if(n!=n0)
-    {DetachH(n0); 
+    {DetachH(n0);
 	A[n] = A[n0];
- 	AttachH(n); 
-	EventRenumber(n, n0);     //Copy data and reschedule as 'n'.  
+ 	AttachH(n);
+	EventRenumber(n, n0);     //Copy data and reschedule as 'n'.
     }
 }
 /*----------------------------------------------------------------------------*
@@ -123,12 +123,12 @@ GroupInit()
 {int i,k,nx,r,mA2;
   mA2=mA;          //maximum population size currently defined in group.h
   nx=mA2/nC; //the number of individuals per group if they are eqaully distributed.
-  r=mA2-nC*nx;  //the remainder 
+  r=mA2-nC*nx;  //the remainder
   k=1;
-  for(i=0.;i<nC;i++) //for each group 
+  for(i=0.;i<nC;i++) //for each group
     {Emptyc[i]=nx;  //initialize its size
       if(i>=nC-r) Emptyc[i] +=1; //distribute the remainder across higher numbered groups
-      Clowest[i]=k; k+=Emptyc[i]; //initialize the group location     
+      Clowest[i]=k; k+=Emptyc[i]; //initialize the group location
       V[i]=1;
     }
   Emptyc[nC]=0.; //close the lost of groups

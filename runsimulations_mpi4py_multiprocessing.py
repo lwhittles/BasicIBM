@@ -18,7 +18,7 @@ n_jobs=4 #number of simulations
 pool_size = (multiprocessing.cpu_count()) #get the number of available CPUs
 if pool_size>n_jobs:  #only use maximum necessary CPUs depending on number of jobs/runs
     pool_size = n_jobs
-    
+
 if mpi:
     from mpi4py import MPI
     comm = MPI.COMM_WORLD #communicator so every process can communicate with every other
@@ -47,8 +47,8 @@ def Run_1_simulation(job):
     r=int(job)#current run/job
     j=0 #change random number seed/job ID
     #call the complied C code
-    #for cluster exclude .exe        
-    call(["./Main_desktop.exe", "fnumber=1"+str(j),\
+    #for cluster exclude .exe
+    call(["./Main_desktop", "fnumber=1"+str(j),\
           "my_id_0="+str(r),"randseq="+str(r)])
     print "finished randseed=",r,"interv=",j
     #close log files
@@ -64,40 +64,40 @@ def Run_1_simulation_wrapped(args):
     try:
         return Run_1_simulation(*args)
     except:
-        print('%s' % (traceback.format_exc()))   
+        print('%s' % (traceback.format_exc()))
 ###############################################
 #set up parallel system
 ###############################################
 jobs_list = list(range(n_jobs))#create a list of n simulations
 
 ################################################
-#This function initializes multiprocessing    
+#This function initializes multiprocessing
 def start_process():
     print 'Starting', multiprocessing.current_process().name
 #################################################
-#This function sets up the parallel processes     
+#This function sets up the parallel processes
 def setup_parallel_process(jobs_list,mpi):
     print 'in setup_parallel_process'
     #create tuples to allow multiple args for multiprocessing
     jobs_tuple=[]
     for i in jobs_list:
         jobs_tuple.append((i,))
-    
+
     ####################
-    if mpi: #run using MPI        
-        import mpi4py_map    
-        mpi4py_map.map(Run_1_simulation_wrapped,jobs_tuple) #provide parameter values for function f and store any results        
-        ##############        
+    if mpi: #run using MPI
+        import mpi4py_map
+        mpi4py_map.map(Run_1_simulation_wrapped,jobs_tuple) #provide parameter values for function f and store any results
+        ##############
     else:#run using python multiprocessing function
         print 'Sending out :', len(jobs_tuple), 'Jobs to', pool_size,' CPUs using multiprocessing'
         pool = multiprocessing.Pool(processes=pool_size,
-                                    initializer=start_process)        
+                                    initializer=start_process)
         pool.map(Run_1_simulation_wrapped, jobs_tuple) #map jobs to CPUs
         pool.close() # no more tasks
         pool.join()  # wrap up current tasks
         #take note of NULL values are failed simulation
-    return 
-       
+    return
+
 ###############################################
 #This function runs and stores n simulations
 def Run_n_simulations(n_jobs,mpi):
@@ -106,10 +106,10 @@ def Run_n_simulations(n_jobs,mpi):
         call(["sbatch","--nodelist=smedcla[10,14]","run.sh"])
     else:
         jobs_list = list(range(n_jobs))
-        setup_parallel_process(jobs_list,mpi)    
+        setup_parallel_process(jobs_list,mpi)
     return
 
-def summarize_n_simulations(n_jobs): #summarize results 
+def summarize_n_simulations(n_jobs): #summarize results
     print 'summarizing model results'
     #initialise summary array
     ylabel=["Year","Total","Deaths","Births","UK born","Non-UK born"]
@@ -120,7 +120,7 @@ def summarize_n_simulations(n_jobs): #summarize results
     for ran in range(0,n_jobs):#random seed used in nameing result files
         ##list of all base and interv file for each random seed
         files=[]
-        files+=["summary_1"+str(i)+str(ran)+".txt" ] 
+        files+=["summary_1"+str(i)+str(ran)+".txt" ]
         filename = files[0]
         #read individual results files
         basearr = genfromtxt(filename, dtype=None, delimiter='\t')
@@ -130,9 +130,9 @@ def summarize_n_simulations(n_jobs): #summarize results
                 basevals_b = basearr
             else:
                 basevals_b += basearr
-                
-    #Calculate the mean over all simulations  
-    meanbasevals_b = basevals_b / count   
+
+    #Calculate the mean over all simulations
+    meanbasevals_b = basevals_b / count
     #Write up the summary
     with open('mean_valiables_base.csv', 'wb') as fout:
         writer = csv.writer(fout, delimiter=',', lineterminator='\n')
@@ -140,7 +140,7 @@ def summarize_n_simulations(n_jobs): #summarize results
         for x in meanbasevals_b:
             row=[]
             for y in x:
-                 row.append(y)            
+                 row.append(y)
             writer.writerow(row)
     #returning some of the summary results is useful is you are going to
     #do some model fitting. Note this version does not do any fitting.
@@ -159,5 +159,3 @@ if __name__ == '__main__':
     end_time = time.time()
     #print total duration of simulation
     print("Elapsed time was %g minutess" % ((end_time - start_time)/60.))
- 
-

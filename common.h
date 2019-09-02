@@ -22,11 +22,11 @@ typedef unsigned int intu;
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <time.h> 
+#include <time.h>
 #define indiv 2000000//870000     //Maximum population size.
 #define INDIV indiv       //Maximum population size.
 //Initialize hashcoded names
-#define ID indiv    //10000						    
+#define ID indiv    //10000
 #define NPSEUDO 2         //Number of pseudo individuals (clock driven)
 #define Ncontacts  100    //Maximum number transmission and infection events per individual
 
@@ -43,19 +43,19 @@ typedef unsigned int intu;
 #define MaxT               MaxE+1            //highest t index
 
 
-struct Indiv                //STRUCTURE OF EACH RECORD                   BYTES 
+struct Indiv                //STRUCTURE OF EACH RECORD                   BYTES
 {
   dec v;                    //Probability of being chosen: Tendai
   //id and idn are required for contacts
-  unsigned int id;          //individual's ID number: Tendai
-  unsigned int idn;         //individual's ID number: Tendai
+  unsigned int id;          //individual's ID number: Tendai, LW: this could be intu
+  unsigned int idn;         //individual's ID number: Tendai, LW: this could be intu
   dec  t[MaxT+1];           //Separate times for individual               64
-  unsigned int groupID;		//Group ID number
+  unsigned int groupID;		//Group ID number, LW: this could be intu
   intu sex;                 //Sex of this individual (0=female, 1=male)    1
   intu rob;                 //Region of birth (0=Foreign-born, 1=UK-born)  1
   intu pending;            //Number of pending event                      1
   intu state;              //Number of present state
-  intu strain;             // infecting strain    
+  intu strain;             // infecting strain
   intu InFunction;	    //current function number
   // bto and bfrom are required for binding lists
   int bto[2];                 //Binding list of infections by this individual

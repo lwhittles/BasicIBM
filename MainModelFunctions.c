@@ -1,4 +1,4 @@
- 
+
 
 /*----------------------------------------------------------------------------*
 MAIN PROGRAM
@@ -17,20 +17,20 @@ int mainfx ( int argc, char *argv[] )
 /******************************************************************************/
 { int i, j, k, l, n, sid;
 
-  startsec = time(NULL);                     //Retrieve the wall-clock time.
+  startsec = time(NULL);                     //Retrieve the wall-clock time. time() in time.h?
 
-  if(fit5i==0) ErrorInit();                  //Trap system failures.
-  MainInit();                                //Start the main program.
+  if(fit5i==0) ErrorInit();                  //Trap system failures. In Error.c
+  MainInit();                                //Start the main program. In Declarations.c
   EventInit();                               //Start the event queue.
   //FinalInit();                               //Start the final reports.
   ReportInit();                              //Start the output reports.
-  
-  A = (struct Indiv *)                       //Allocate array of individuals.
+
+  A = (struct Indiv *)                       //Allocate array of individuals. struct Indiv defined in common.h
     calloc(indiv+NPSEUDO, sizeof(struct Indiv)+nEngines); //(Not static because of gcc bug
   if(A==0) Error(911.);                      //restricting such arrays to 2GB.)
 
   if(SUPER) maximm = 10000000;              //Adjust 'maximm' depending on
-  else      maximm =  indiv-1;              //whether running on supercomp. 
+  else      maximm =  indiv-1;              //whether running on supercomp.
                                             //Adjusted by Tendai. NB maximm<<indiv in common.h .Changed to indiv-1 on 05/03/15
 
   Data();                                    //Read in appropriate data files
@@ -60,14 +60,14 @@ int mainfx ( int argc, char *argv[] )
   else rand0 = RandStartArb(rand0);          //place.
 
   EventStartTime(t0);                        //Initialize the event queues.
-  
+
   t = t0;                                    //Set the starting time
-  
+
   fpds=fopen(ftimesname, "w");
 
   InitPop();                                 //Set up initial population.
-  BindInit();                                //Initilize Binding.  
-  		
+  BindInit();                                //Initilize Binding.
+
   snprintf(fname, sizeof(fname), "%s_%d%d.txt", fnamestem, (int)fnumber,(int)randseq);
   printf ( "\n" );
   printf ( "  The name is %d.\n", (int)fnumber );
@@ -109,7 +109,7 @@ EXIT:  The next event has been processed and 'events' incremented, if the
 
 Dispatch()
 { int n; dec tw;
-   
+
   tw = t;                                    //Remember the previous time.
   n = EventNext(); if(t>t1) return 0;          //Advance time to the next event. //Tendai changed return to return 0; to avoid warnings
   tstep(tw, t);                              //Record the size of the time step.
@@ -144,17 +144,17 @@ BirthG()
   n=CCadd(UK);
   Birth(n,t);                     //Create someone born in the UK.
   Cbirth.type=4;                          //Assign clock type
-  Cbirth.rate=1/ypb;                      //Assign birth rate 
+  Cbirth.rate=1/ypb;                      //Assign birth rate
   //Cbirth.rate=1/ypb_fixed;           //if rate is fixed
   //Cbirth.rate=bcy[yr];  		//if rate in based on data sotred in array bcy
 
-  Cbirth.rel=1;                         //Assign relative width of a random 
-                                          //interval during which the next 
+  Cbirth.rel=1;                         //Assign relative width of a random
+                                          //interval during which the next
                                           //birth is allowed to happen.
-  Cbirth = ClockTick(Cbirth);             //call clock ticker 
+  Cbirth = ClockTick(Cbirth);             //call clock ticker
   A[BIRTH].pending = pBirth;              //Schedule the next birth.
-  EventSchedule(BIRTH,Cbirth.next);       
-       
+  EventSchedule(BIRTH,Cbirth.next);
+
 }
 
 /*----------------------------------------------------------------------------*
@@ -186,7 +186,7 @@ EXIT:  'Birth' contains a status code.
 int Birth(int n, dec b)
 { int y, s, v, e,rob; dec wd, wh,we,age;
   A[n].InFunction=fnc_Birth;
-  
+
   y = (int)t - (int)t0;                        //Retrieve year index for arrays.
   if(n<Clowest[UK]) Error1(610.1, "n=",(dec)n);//Check for appropriate 'n', this
   if(n>indiv)    Error1(610.2, "n=",(dec)n); //routine does not allow immigrant
@@ -239,11 +239,11 @@ Death(int n)
 
   	{ age1[0] += age; age2[0] += age*age;//Accumulate statistics for mean
     	agec[0] += 1; }                      //age and its variance.
-	
+
 	N[gid] -=1;                    //Decrement N[A[n].groupID][A[n].state].
 	popsize-=1;	                     //updte population size
 	deaths += 1;                         //Increment the number of deaths.
-	
+
         BindDelete(A[n].bfrom);              //remove contact links
         BindDelete(A[n].bto);                //remove contact links
         DetachH(n);                          //Remove from the database.
@@ -263,7 +263,7 @@ ENTRY: 'Target_pop_size' Target fixed population size.
 EXIT:  If the population is < Target_pop_size: a new
        individual 'n' is sent to the Birth() function, to be initialized as a
         susceptible newborn.
-       If the population is > Target_pop_size: an individual 'n' 
+       If the population is > Target_pop_size: an individual 'n'
 	is selected and sent to the Death() function, to be removed from the population.
        'deaths' is incremented.
        Counters 'age1', 'age2', and 'agec' are updated.
@@ -273,18 +273,18 @@ Check_population_size()
 {
 	int y,j,n,i,z;
 	int grpcount,randgrp;
-  
+
 	z=CCgroup_size(NUK)+CCgroup_size(UK);      //Current populaton size
 
 	if (z<Target_pop_size){                    //check if current population is too small
 	for (i=0;i<(Target_pop_size-z);i++){       //create (Target_pop_size-z) new individuals
 	n=CCadd(UK);
-	Birth(n,t); }}                             //Create someone born in the UK. 
+	Birth(n,t); }}                             //Create someone born in the UK.
 
 	if (z>Target_pop_size){                   //check if current population is too large
 	if ((z-Target_pop_size)>0){               //select (z-Target_pop_size) to repmove from the population
 	 j=0;
-  	 do{  
+  	 do{
 	  do {randgrp=Rand()*2;
       	  n=CCsel(randgrp);} while (n==0);                     //select a random indiv from the whole population
       	 EventCancel(n);
@@ -325,7 +325,7 @@ dec LifeDsn(int n,int sex, dec age, dec mort)
   q=A[n].state;
   switch(lifedsn)
   {
-    case 0: return 1./mort;                     //mortality    
+    case 0: return 1./mort;                     //mortality
     //case 1: return Gompertz(sex,age,mort);   //Gompertz-Makeham death.
     case 1:                                  //Empirical life tables.
     {  yb = (int)(t-age);                    //Get year of birth.
@@ -370,14 +370,14 @@ ii=0;
  yr=(int)(t-t0);
 
     for(a=0; a<121; a++){                        //age
-    for(s=0; s<2;   s++){                      //sex 
+    for(s=0; s<2;   s++){                      //sex
     for(rob=0; rob<2; rob++){                 //region of birth
 	for(i=0; i<n1981[a][s][rob]*0.1;i++){//scaled down
 	if(ii>INDIV) Error(623);          //Check population size.
-	age = a+Rand();                     //Assign age plus random bit. 
+	age = a+Rand();                     //Assign age plus random bit.
 	n=CCadd(rob);                        //Add new individual
 	ii=ii+1;
-	BasicInd(yr,n,rob,age,s,rob);                    //Set up basic individual. 
+	BasicInd(yr,n,rob,age,s,rob);                    //Set up basic individual.
         EventCancel(n);
   	Check_all_events(n);
 	}}}}
@@ -385,7 +385,7 @@ ii=0;
 /*----------------------------------------------------------------------------*
 SET UP BASIC INDIVIDUAL FOR POPULATION INITIALIZATION
 
-This function sets up a basic individual assigned to a death, emigration time. 
+This function sets up a basic individual assigned to a death, emigration time.
 This is similar to birth but processes individuals of any
 age, sex, or region of birth (anyone being initialized when the model starts).
 The scheduled event may change if a state other than 'Uninfected' is
@@ -416,12 +416,12 @@ BasicInd (int yr, int n, int rob, dec age, int s, int grp)
   A[n].tBirth = t-age;                  //Assign birth time from age.
   A[n].sex = s;                         //Assign sex.
   A[n].state=qUTB;                         //Initialize TB Disease state
-  q=A[n].state;  
+  q=A[n].state;
   A[n].strain=0;
   A[n].tDeath = wd = t+LifeDsn(n,s,age,m1[q]); //Assign time of death.
   if(wd<A[n].tBirth+age) Error(612.2);          //Check death time.
   if(wd<t) Error(850.);                      //check for errors
-  
+
   Check_all_events(n);
  }
 
@@ -482,7 +482,7 @@ Report(char *prog)
     printf("Label NUKborn: Total number of non-UK born\n");
     printf("\n t \t  \tN \t   \tDeaths  \tBirths \tUK \tNUK\n");
   }
-    //Calculate result summarise	
+    //Calculate result summarise
     z1=CCgroup_size(UK);
     z2=CCgroup_size(NUK);
 
@@ -510,7 +510,7 @@ Report(char *prog)
 ////////////////////////////////////////////////////////////////////////
   if((t-y)>0.3 && (t-y)<0.7 && y>1998)       //Since computation is expensive
   {                                          //only get population sizes when
-                                             //necessary (mid-year).  
+                                             //necessary (mid-year).
   for(j=0;j<nC;j++){
     immid=Clowest[j+1]-Emptyc[j];
     yr = y-(int)t0;                          //Get year array index.
@@ -688,10 +688,10 @@ dec *patab[] =                               //Table of parameter addresses.
 { &my_id_0, &currentrun, &fnumber, &randseq, 0 };
 
 #include "service.c"
- 
+
 
 /*============================================================================*
-NOTES 
+NOTES
 _____________________________________________________
 Before running on supercomputer:
 1) Change 'SUPER' to '1'
@@ -700,5 +700,3 @@ _____________________________________________________
 
 
 */
- 
-
