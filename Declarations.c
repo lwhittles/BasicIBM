@@ -24,7 +24,7 @@ int Target_pop_size = 700000;  //Population size if population size will be cons
 #define NUK   0                //Array index for non-UK born.
 #define UK    1                //Array index for UK-born.
 #define nC         2           //number of groups
-#define TotalPgrps nC          //total population subgroups 
+#define TotalPgrps nC          //total population subgroups
 
 
 //Sex
@@ -75,17 +75,17 @@ PARAMETERS AND CONTROL VARIABLES
 
 /* Population initialization */
 dec n1981[121][2][2];          //Numbers in each age/sex/rob category at
-                               //population initialization, 1981. 
+                               //population initialization, 1981.
 
 /* Mortality */
 dec A1[AC];                    //Holds ages 0-121 which correspond to the
-            
+
                    //cumulative probabilities in M1.
 dec M1[BY][2][AC];             //Cumulative probabilities of death by a given
                                //birth cohort, sex and age.
 /*These are old mortality rates used to generate lifetimes with exponential
 distribution, left to keep compatibility with testing version of model */
-dec  m1[1];               //Mortality of uninf ind's 
+dec  m1[1];               //Mortality of uninf ind's
 
 
 //*Birth and migration */
@@ -100,7 +100,7 @@ dec randseq = 0;               //Random number sequence (set with 'randseq=N').
 dec tgap    = 1;//0.5;             //Time between reports, years.
 dec kernel  = 0;               //Contagion kernel, 0=Panmictic, 1=Cauchy.
 dec sigma   = 1;               //Width of contagion kernel, where applicable.
-https://github.com/TendaiMugwagwa/BasicIBM
+
 //create an output file to store simulation results
 char fnamestem[]="summary";
 dec fnumber=12.;
@@ -136,11 +136,11 @@ EXIT:  'A1' contains ages which accompany 'M1' for calls to 'RandF'
 void Data()
 { int i,j,k,temp,a,s,y,r,ac,st; dec temp2;
 //-printf("Entering Data() routine....\n");
-	
+
   for(i=0; i<AC; i++)                //Create array of ages which correspond
   { A1[i]=i;                         //to cumulative probabilities of death
      }                       //in M1 (A1) and cumulative probabilities
- 
+
 
 m1[qUTB]=0.01;               //Mortality of uninf ind
 
@@ -163,8 +163,8 @@ This function updates variables associated with parameters that change with
 each model run. This routine must come after any change to parameters, e.g.
 through the 'gparam' function. Currently no parameters are changed so the function can be ignored
 
-ENTRY: 
-EXIT: 
+ENTRY:
+EXIT:
 */
 void Param()
 { int a,s,r;
@@ -177,7 +177,7 @@ void Param()
 MAIN INITIALIZATION
 
 This routine should be called each time the program is reused, to clear static
-variables for the next run. The function was added to allow the fitting routine, 
+variables for the next run. The function was added to allow the fitting routine,
 to implemented parallel, replicate runs of the TB program. This would not be necessary if the program
 were called as independent executable, as before.
 */
@@ -187,8 +187,7 @@ MainInit()
   //Initialize counters
   for(j=0;j<TotalPgrps;j++)//Groups
   N[j] =  0;
-	
+
 popsize=0;                   //current population size
 
 }
-
