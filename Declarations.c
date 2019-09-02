@@ -40,11 +40,16 @@ int Target_pop_size = 700000;  //Population size if population size will be cons
 #define minBY 1870
 //Counters
 int N[TotalPgrps];                     //Current number in each group
+int UTB[TotalPgrps];           //Current number uninfected in each group
+int LTB[TotalPgrps];           //Current number with latent TB in each group
+int ATB[TotalPgrps];           //Current number with active TB in each group
 dec age1[2],age2[2],agec[2];   //Accumulators for 1st and 2nd moments of age.
 
 int deaths;                    //Current number of deaths.
 int nbirths;                   //Current number of births
+int progressions;              //Current number of progressions.
 int events;                    //Current number of events dispatched.
+
 
 int immid;                     //Next available ID number for immigrants.
 int ukbid;                     //Next available ID number for UK-born.
@@ -111,7 +116,7 @@ char ftimesname[] ="diseasetocare.txt";
 struct IO fmt[] =              //Format statements for input/output.
 { /*00*/ { (dec*)bcy,     {-'i',RT+7} },
   /*01*/ { (dec*)pmale,   {-'i',RT} },
-  /*02*/ { (dec*)n1981,   {-'a',121,-'s',2,-'r',2},  {-'s',-'a',-'R',1,0,1} },
+  /*02*/ { (dec*)n1981,   {-'a',121,-'s',2,-'r',2},  {-'s',-'a',-'R', -'st',1,0,1} },
   /*03*/ { (dec*)M1,      {-'b',BY, -'s',2,-'a',AC}, {-'s',-'b',-'A'} },
          { }};
 

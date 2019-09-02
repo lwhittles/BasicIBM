@@ -198,7 +198,7 @@ int Birth(int n, dec b)
   s = A[n].sex;
   age=0.;                                 //sent age
   rob=UK;				  //assign country of birth
-  BasicInd(y,n,UK,age,s,UK);                  //Set up basic individual.
+  BasicInd(y,n,UK,age,s,UK, qUTB);                  //Set up basic individual.
   EventCancel(n);
   Check_all_events(n);                       //Update schedule for all events
 
@@ -371,13 +371,14 @@ ii=0;
 
     for(a=0; a<121; a++){                        //age
     for(s=0; s<2;   s++){                      //sex
-    for(rob=0; rob<2; rob++){                 //region of birth
+    for(rob=0; rob<2; rob++){   //region of birth
 	for(i=0; i<n1981[a][s][rob]*0.1;i++){//scaled down
 	if(ii>INDIV) Error(623);          //Check population size.
 	age = a+Rand();                     //Assign age plus random bit.
 	n=CCadd(rob);                        //Add new individual
+  st = Rand()<0.00078? 0: 1;      //Assign infection status from random number generation.
 	ii=ii+1;
-	BasicInd(yr,n,rob,age,s,rob);                    //Set up basic individual.
+	BasicInd(yr,n,rob,age,s,rob, st);                    //Set up basic individual.
         EventCancel(n);
   	Check_all_events(n);
 	}}}}
@@ -401,7 +402,7 @@ EXIT:   'A[n]' is in the Uninfected state and scheduled for its earliest
           event.
 
 */
-BasicInd (int yr, int n, int rob, dec age, int s, int grp)
+BasicInd (int yr, int n, int rob, dec age, int s, int grp, int st)
 { dec wd, we, wv;
  int q;
   A[n].InFunction=fnc_BasicInd;
@@ -415,7 +416,7 @@ BasicInd (int yr, int n, int rob, dec age, int s, int grp)
   A[n].groupID = grp;                   //Assign initial group
   A[n].tBirth = t-age;                  //Assign birth time from age.
   A[n].sex = s;                         //Assign sex.
-  A[n].state=qUTB;                         //Initialize TB Disease state
+  A[n].state= st;                     //Initialize TB Disease state
   q=A[n].state;
   A[n].strain=0;
   A[n].tDeath = wd = t+LifeDsn(n,s,age,m1[q]); //Assign time of death.
@@ -476,26 +477,28 @@ Report(char *prog)
 
     printf("Label t:	Time, in years and fractions thereof.\n");
     printf("Label N:	Total population size.\n");
+    printf("Label Progs: Number of progressions since last report\n");
     printf("Label Deaths:  Number of deaths since last report.\n");
     printf("Label nbirths: Total number of births.\n");
     printf("Label UKborn: Total number of UK born\n");
     printf("Label NUKborn: Total number of non-UK born\n");
-    printf("\n t \t  \tN \t   \tDeaths  \tBirths \tUK \tNUK\n");
+
+    printf("\n t \t  \tN \t  \t Progressions \t   \tDeaths  \tBirths \tUK \tNUK\n");
   }
     //Calculate result summarise
     z1=CCgroup_size(UK);
     z2=CCgroup_size(NUK);
 
    //Write results to screen.
-    printf("%6.1f  \t%d	\t%d  \t%d   \t%d  \t%d\n",
-    t, popsize, deaths, nbirths,z1,z2);
+    printf("%6.1f  \t%d	\t%d  	\t%d \t%d   \t%d  \t%d\n",
+    t, popsize, progressions, deaths, nbirths,z1,z2);
 
   ///Write results to output file which is defined in Declarations.c
-  fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\n",t, popsize, deaths, nbirths,z1,z2);
+  fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\t%d\n",t, popsize, progressions, deaths, nbirths,z1,z2);
 
   fprintf(stderr, "  %.1f\r", t);            //Update status indicator.
   fflush(stdout); fflush(stderr);            //Make sure everything shows.
-  deaths = events =nbirths = 0;      //Clear time-step counters.
+  deaths = progressions = events =nbirths = 0;      //Clear time-step counters.
 
 
 /////////////////////////////////////////////////////////////////

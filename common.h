@@ -33,12 +33,14 @@ typedef unsigned int intu;
 
 //TB TRANSITIONS:
 #define pDeath     0   //Pending death
-#define MaxE       0  //Maximum pending event (non-clock)
+#define pProgress  1   //Pending progression
+#define MaxE       1  //Maximum pending event (non-clock)
 //Clocks
 #define pBirth     MaxE+1   //Pending birth
 
 // FUTURE TIMES:
 #define tDeath       t[pDeath]      //Time for closure of this record
+#define tProgress    t[pProgress]    //Time for progress????
 #define tBirth             t[pBirth]             //Time of initiation of this record
 #define MaxT               MaxE+1            //highest t index
 
@@ -67,8 +69,12 @@ extern struct Indiv *A;   //List of individuals.
 
 // TB STATES:
 #define qUTB         0//1-1   //Uninfected
+#define qLTB         1      //Latently Infected
+#define qATB          2     //Actively Infected
 #define q0           qUTB //Lowest numbered state
 #define q1           qUTB  //Highest numbered state
+
+
 
 
 
@@ -113,5 +119,7 @@ int StrainNum(int);
 #define fnc_BasicInd 5
 #define fnc_VanDispatch 6
 #define fnc_TransferGroup 7
+#define fnc_Progress 8
+
 
 // Clarence Lehman, August 2009, modified by Adrienne Keen, 2010, modified by Tendai 2016-
