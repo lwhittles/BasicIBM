@@ -185,7 +185,7 @@ EXIT:  'Birth' contains a status code.
 */
 
 int Birth(int n, dec b)
-{ int y, s, v, e,rob; dec wd, wh,we,age;
+{ int y, s, v, e,rob, st; dec wd, wh,we,age;
   A[n].InFunction=fnc_Birth;
 
   y = (int)t - (int)t0;                        //Retrieve year index for arrays.
@@ -199,7 +199,9 @@ int Birth(int n, dec b)
   s = A[n].sex;
   age=0.;                                 //sent age
   rob=UK;				  //assign country of birth
-  BasicInd(y,n,UK,age,s,UK, qUTB);                  //Set up basic individual.
+  st = Rand()<0.00078? 1: 0;      //Assign infection status from random number generation.
+
+  BasicInd(y,n,UK,age,s,UK, st);                  //Set up basic individual.
   EventCancel(n);
   Check_all_events(n);                       //Update schedule for all events
 
@@ -244,6 +246,16 @@ Death(int n)
 	N[gid] -=1;                    //Decrement N[A[n].groupID][A[n].state].
 	popsize-=1;	                     //updte population size
 	deaths += 1;                         //Increment the number of deaths.
+  if(q == qUTB) {
+    uninfecteds -=1;
+    UTB[gid] -=1;
+  } else if(q==qLTB) {
+    latents -=1;
+    LTB[gid] -=1;
+  } else if(q==qATB) {
+    actives -=1;
+    ATB[gid] -=1;
+  }
 
         BindDelete(A[n].bfrom);              //remove contact links
         BindDelete(A[n].bto);                //remove contact links
@@ -274,7 +286,7 @@ EXIT:
 
 */
 Progress(int n)
-{ int n2,yr,gid,tr,st,q,qv; dec age, mort,wd;
+{ int n2,yr,gid,tr,st,q,qv,s; dec age, mort,wd, te;
      A[n].InFunction=fnc_Progress;
 	     st=A[n].strain;
 
@@ -282,7 +294,7 @@ Progress(int n)
         A[n].state = qATB;                  // update current infection state
         	age = t-A[n].tBirth;               //Compute the age at progression.
           s = A[n].sex;
-          mort = 2.0;
+          mort = 0.1;
 
 
 
@@ -297,10 +309,10 @@ Progress(int n)
         wd = t + te;              // calculate calendar date
         if(wd<A[n].tDeath) {              // if before natural death
         A[n].tDeath = wd;                  // update time of death
-        A[n].pending = pDeath;              // update pending event
-        EventSchedule(n, wd);         // schedule new death
       }
-  return 1;
+      A[n].pending = pDeath;              // update pending event
+      EventSchedule(n, wd);
+  return 3;
 }
 
 
@@ -423,8 +435,10 @@ ii=0;
 	for(i=0; i<n1981[a][s][rob]*0.1;i++){//scaled down
 	if(ii>INDIV) Error(623);          //Check population size.
 	age = a+Rand();                     //Assign age plus random bit.
-	n=CCadd(rob);                        //Add new individual
-  st = Rand()<0.00078? 0: 1;      //Assign infection status from random number generation.
+	n = CCadd(rob);                        //Add new individual
+  st = Rand()<0.00078? 1: 0;      //Assign infection status from random number generation.
+
+
 	ii=ii+1;
 	BasicInd(yr,n,rob,age,s,rob, st);                    //Set up basic individual.
         EventCancel(n);
@@ -451,7 +465,7 @@ EXIT:   'A[n]' is in the Uninfected state and scheduled for its earliest
 
 */
 BasicInd (int yr, int n, int rob, dec age, int s, int grp, int st)
-{ dec wd, we, wv;
+{ dec wd, we, wv, prog;
  int q;
   A[n].InFunction=fnc_BasicInd;
   popsize+=1;                           //update population size
@@ -465,11 +479,23 @@ BasicInd (int yr, int n, int rob, dec age, int s, int grp, int st)
   A[n].tBirth = t-age;                  //Assign birth time from age.
   A[n].sex = s;                         //Assign sex.
   A[n].state= st;                     //Initialize TB Disease state
+  prog = 0.1;
+  if(st) {                               //if state is > 0 diseased
+    latents +=1;                          // increase latent pop
+    LTB[grp] += 1;                        // in correct group
+    we = t + Expon(prog);    //  future time of progression
+    A[n].tProgress = we;
+    if(we<t) Error(853.);                      //check for errors
+  } else {                                // otherwise
+    uninfecteds +=1;                      // increase unininfected pop
+    UTB[grp] += 1;                          //in correct group
+  }
   q=A[n].state;
   A[n].strain=0;
   A[n].tDeath = wd = t+LifeDsn(n,s,age,m1[q]); //Assign time of death.
   if(wd<A[n].tBirth+age) Error(612.2);          //Check death time.
   if(wd<t) Error(850.);                      //check for errors
+  A[n].pending = wd<we? pDeath:pProgress;
 
   Check_all_events(n);
  }
@@ -503,7 +529,8 @@ EXIT:  The next line of the report has been printed.
 */
 
 static int ReportFirst;
-ReportInit() { ReportFirst = 0; } //To print headers set to 0;
+ReportInit() { ReportFirst = 0;
+} //To print headers set to 0;
 
 Report(char *prog)
 {
@@ -534,15 +561,14 @@ Report(char *prog)
     printf("Label UKborn: Total number of UK born\n");
     printf("Label NUKborn: Total number of non-UK born\n");
 
-    printf("\n t \t  \tN \t  \t  \tUTB \t  \t LTB \t \t ATB \t
-            \t Progressions \t Deaths \tBirths \tUK \tNUK\n");
+    printf("\n t \t\t N  \t\t UTB \t LTB \t ATB \t Progs \t Deaths \tBirths \tUK \tNUK\n");
   }
     //Calculate result summarise
     z1=CCgroup_size(UK);
     z2=CCgroup_size(NUK);
 
    //Write results to screen.
-    printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d  	\t%d \t%d   \t%d  \t%d\n",
+    printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d\n",
     t, popsize, uninfecteds,latents, actives, progressions, deaths, nbirths,z1,z2);
 
   ///Write results to output file which is defined in Declarations.c

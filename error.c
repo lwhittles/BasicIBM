@@ -68,7 +68,7 @@ static char *message[] =
   "E742%s  Attempt to initialize when the time bins are not empty",
   "E753%s  A binary search table is invalid",
   "E754%s  A cumulative table has gone beyond 1",
-  
+
 
   "F818%s  An existing event cannot be found in the time bins",
   "F819%s  The event counter has fallen negative",
@@ -77,6 +77,7 @@ static char *message[] =
   "F850%s  A birth occurred before the present",
   "F851%s  The width of a clock interval is too large",
   "F852%s  The specified type of clock is not supported",
+  "F853%s  A progression occurred before the present",
 
   "F911%s  Not enough memory is available",
   "F920%s  An index is out of range",
@@ -360,7 +361,7 @@ int ErrorTrace()
   return 0;
 }
 
-// The code for stack tracing is temporarily removed to compile it under Cygwin 
+// The code for stack tracing is temporarily removed to compile it under Cygwin
 // easily.
 
 /*
@@ -374,4 +375,3 @@ CLARENCE LEHMAN, APRIL 1988.
 
 3. Error messages to 'stderr' rather than 'stdout', April 2011 [CLL].
 */
-
