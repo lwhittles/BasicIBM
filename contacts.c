@@ -29,7 +29,7 @@ method for hashcoding is not important and a simple modulus division can
 suffice, as in the algorithms below.
 
 */
-int H[ID];                     //Hash codes
+int H[ID]; //Hash codes
 
 /*
 Assign unique identification
@@ -52,10 +52,16 @@ EXIT: 'L' returns the index of the individual in the database array.
 
 */
 int Li(int id)
-{int n;
-  for (n=H[id%ID]; ; n=A[n].idn)
- { if(n==0) Error(999.);
- if(id==A[n].id) return n; } }
+{
+  int n;
+  for (n = H[id % ID];; n = A[n].idn)
+  {
+    if (n == 0)
+      Error(999.);
+    if (id == A[n].id)
+      return n;
+  }
+}
 /*NOTE: Perhaps should include a counter to guard against accidental infinite
   loops in the list of links, in this routine and the one below.*/
 
@@ -69,10 +75,15 @@ if the individual is no longer in the database.
 
 */
 int Lz(int id)
-{ int n;
-  for(n=H[id%ID]; ; n=A[n].idn)
-    { if(n==0) return 0;
-      if(id==A[n].id) return n; } 
+{
+  int n;
+  for (n = H[id % ID];; n = A[n].idn)
+  {
+    if (n == 0)
+      return 0;
+    if (id == A[n].id)
+      return n;
+  }
 }
 
 /*-------------------------------------------------------------------------------
@@ -87,9 +98,12 @@ EXIT: The individual is linked.
 
 */
 void AttachH(int n)
-{ int id=A[n].id;
- if(Lz(id)) Error(997.);
- A[n].idn=H[id%ID]; H[id%ID]=n;
+{
+  int id = A[n].id;
+  if (Lz(id))
+    Error(997.);
+  A[n].idn = H[id % ID];
+  H[id % ID] = n;
 }
 
 /*-------------------------------------------------------------------------------
@@ -103,13 +117,27 @@ EXIT: The individual is unlinked and may be moved or deleted.
 
 */
 void DetachH(int n)
-{ int id, nprev;
- id=A[n].id; n=H[id%ID]; if(n==0) Error(998.);
- if(id==A[n].id) { H[id%ID]=A[n].idn; A[n].idn=0; return; }
+{
+  int id, nprev;
+  id = A[n].id;
+  n = H[id % ID];
+  if (n == 0)
+    Error(998.);
+  if (id == A[n].id)
+  {
+    H[id % ID] = A[n].idn;
+    A[n].idn = 0;
+    return;
+  }
 
- for(nprev=n, n=A[n].idn; n; nprev=n, n=A[n].idn)
-   if(id==A[n].id) { A[nprev].idn=A[n].idn; A[n].idn=0; return; }
- //Error(997.); //what is the purpose for this error?
+  for (nprev = n, n = A[n].idn; n; nprev = n, n = A[n].idn)
+    if (id == A[n].id)
+    {
+      A[nprev].idn = A[n].idn;
+      A[n].idn = 0;
+      return;
+    }
+  //Error(997.); //what is the purpose for this error?
 }
 
 /*UNIQUE IDENTIFIERS AND CONTACT LISTS
@@ -232,15 +260,17 @@ The routines in this module implement algorithms to manage such lists.
 //#include "protos.h"
 
 /*UNIQUE IDENTIFIERS AND CONTACT LISTS*/
-#define BN INDIV*10 ////Number of contacts for testing.
+#define BN INDIV * 10 ////Number of contacts for testing.
 
 struct Bind //Structure of records in array 'B',
-{ int k[2]; //Link and individual identifer.
- dec time; //Creation time (optinal).
- char spec[4]; }; //Codes describing this record.
+{
+  int k[2]; //Link and individual identifer.
+  dec time; //Creation time (optinal).
+  char spec[4];
+}; //Codes describing this record.
 
 struct Bind B[BN]; //Lists of all bindings.
-extern dec t; //Simulated time.
+extern dec t;      //Simulated time.
 /*------------------------------------------------------------------------------
 Display set of bindings
 This routine displays a list one element at a time, in order. It is called
@@ -252,9 +282,14 @@ EXIT: The list element has been displayed.
 
 */
 void BindList(int id)
-{ if (id<0) printf("Bound:");
- else if(id>0) printf(" %d\n", id);
- else printf("\n"); }
+{
+  if (id < 0)
+    printf("Bound:");
+  else if (id > 0)
+    printf(" %d\n", id);
+  else
+    printf("\n");
+}
 
 /*------------------------------------------------------------------------------
 Initialize data structure
@@ -271,9 +306,12 @@ ENTRY: No significant additions.
 EXIT: The data structure 'B' has been initialized.
 */
 void BindInit()
-{ int i;
-  for(i=0; i<BN-1; i++) B[i].k[0]=i+1; //Sequence the empty list in order.
- B[0].k[1]=BN-1; } //Record the last element.
+{
+  int i;
+  for (i = 0; i < BN - 1; i++)
+    B[i].k[0] = i + 1; //Sequence the empty list in order.
+  B[0].k[1] = BN - 1;
+} //Record the last element.
 
 /*------------------------------------------------------------------------------
 Bind a new record, chronological order
@@ -297,18 +335,27 @@ into array 'B'.
 */
 void Bind(int b[2], int id)
 {
-int j=B[0].k[0]; if(j==0) Error(980.); //Locate the first available entry,
- B[0].k[0]=B[j].k[0]; //if any is available, and remove
+  int j = B[0].k[0];
+  if (j == 0)
+    Error(980.);         //Locate the first available entry,
+  B[0].k[0] = B[j].k[0]; //if any is available, and remove
 
- if(B[0].k[0]==0) B[0].k[1]=0; //it from the available list.
+  if (B[0].k[0] == 0)
+    B[0].k[1] = 0; //it from the available list.
 
- B[j].time=t; //Prepare the new entry and link it
- B[j].k[0]=0; B[j].k[1]=id; //to the end of the list.
+  B[j].time = t; //Prepare the new entry and link it
+  B[j].k[0] = 0;
+  B[j].k[1] = id; //to the end of the list.
 
- if(b[1]==0) b[1]=j;
- else B[b[1]].k[0]=j;
+  if (b[1] == 0)
+    b[1] = j;
+  else
+    B[b[1]].k[0] = j;
 
- b[1]=j; if(b[0]==0) b[0]=j; } //Record it in the database record.
+  b[1] = j;
+  if (b[0] == 0)
+    b[0] = j;
+} //Record it in the database record.
 
 /*----------------------------------------------------------------------------
 Bind a new record, reverse chronological order
@@ -327,13 +374,21 @@ EXIT: The new binding is at the beginning of list 'b', and 'b[0]' records its in
 into array 'B'.
 */
 void BindReverse(int b[2], int id)
-{ int j=B[0].k[0]; if(j==0) Error(980.); //Locate the first available entry,
- B[0].k[0]=B[j].k[0]; //if any is available, and remove
- if(B[0].k[0]==0) B[0].k[1]=0; //it from the available list.
+{
+  int j = B[0].k[0];
+  if (j == 0)
+    Error(980.);         //Locate the first available entry,
+  B[0].k[0] = B[j].k[0]; //if any is available, and remove
+  if (B[0].k[0] == 0)
+    B[0].k[1] = 0; //it from the available list.
 
- B[j].time=t; //Prepare the new entry and link it
- B[j].k[0]=b[0]; B[j].k[1]=id; //to the front of the list.
- b[0]=j; if(b[1]==0) b[1]=j; } //Record it in the database record.
+  B[j].time = t; //Prepare the new entry and link it
+  B[j].k[0] = b[0];
+  B[j].k[1] = id; //to the front of the list.
+  b[0] = j;
+  if (b[1] == 0)
+    b[1] = j;
+} //Record it in the database record.
 
 /*-----------------------------------------------------------------------------
 Discard a list of bindings, releasing all elements
@@ -349,10 +404,14 @@ EXIT: The list defined by 'b' on entry has been discarded.
 Data structure 'B' is updated.
 */
 void BindDelete(int b[2])
-{ if(b[0]==0) return; ////Ignore empty lists.
- B[b[1]].k[0]=B[0].k[0]; B[0].k[0]=b[0]; //Attach the list being discarded
- if(B[0].k[1]==0) B[0].k[1]=b[1]; //to the available list.
- b[0]=b[1]=0;   //Clear pointers in the database.
+{
+  if (b[0] == 0)
+    return; ////Ignore empty lists.
+  B[b[1]].k[0] = B[0].k[0];
+  B[0].k[0] = b[0]; //Attach the list being discarded
+  if (B[0].k[1] == 0)
+    B[0].k[1] = b[1]; //to the available list.
+  b[0] = b[1] = 0;    //Clear pointers in the database.
 }
 /*------------------------------------------------------------------------------
 Scan through the list noting each individual
@@ -365,11 +424,13 @@ the present list he is completed.
 Data structure 'B' is initialized.
 */
 void BindNote(int b[2], void Note(int id))
-{ int i; 
- Note(-1); //Mark the beginning.
- for(i=b[0]; i>0; i=B[i].k[0]) ////Pass all list elements in order.
- Note(B[i].k[1]);
- Note(0); } ////Mark the end.
+{
+  int i;
+  Note(-1);                            //Mark the beginning.
+  for (i = b[0]; i > 0; i = B[i].k[0]) ////Pass all list elements in order.
+    Note(B[i].k[1]);
+  Note(0);
+} ////Mark the end.
 
 /*------------------------------------------------------------------------------
 Determine whether a specified individual is in the list
@@ -380,7 +441,8 @@ ENTRY: 'b' is the list to be checked.
 Data structure 'B' is initialized.
 EXIT: 'BindCount' tells how many times the specified individual appears in
 the list.
-*//*
+*/
+/*
 int BindCount(int b[2], int id)
 { int k=0,i;
 
@@ -390,25 +452,32 @@ int BindCount(int b[2], int id)
  return k; }*/
 //returns the total number of contacts within a specified period of time
 int BindCount(int b[2], dec tn)
-{ int z=0,i;
- for(i=b[0]; i>0; i=B[i].k[0])
- if((t-B[i].time)<tn) z+=1;
- return z; }
+{
+  int z = 0, i;
+  for (i = b[0]; i > 0; i = B[i].k[0])
+    if ((t - B[i].time) < tn)
+      z += 1;
+  return z;
+}
 
 //returns an array with contacts within a specified period of time
 int *BindTrace(int b[2], dec tn)
-{ int j=b[0]; if(j==0) Error(980.); //Locate the first available entry
-int z=BindCount(b,tn);
-static int c[1000];
-int i=0;
-while(j>0){  
-//if((t-B[j].time)<tn) printf("Time=%f  id=%d j=%d\n",B[j].time,B[j].k[1],j);
-c[i]=B[j].k[1];
-j=B[j].k[0];
-i+=1;
-}
-//printf("\n");
-return c;
+{
+  int j = b[0];
+  if (j == 0)
+    Error(980.); //Locate the first available entry
+  int z = BindCount(b, tn);
+  static int c[1000];
+  int i = 0;
+  while (j > 0)
+  {
+    //if((t-B[j].time)<tn) printf("Time=%f  id=%d j=%d\n",B[j].time,B[j].k[1],j);
+    c[i] = B[j].k[1];
+    j = B[j].k[0];
+    i += 1;
+  }
+  //printf("\n");
+  return c;
 }
 
 /*------------------------------------------------------------------------------
@@ -418,8 +487,6 @@ EXIT: 'BindProfile' returns the size of the binding tables.
 
 */
 int BindProfile() { return sizeof(B); }
-
-
 
 /*Laboratory Notebook
 File set 57B55AD7

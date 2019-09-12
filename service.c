@@ -83,7 +83,6 @@ int Kernel(int n)
 
 */
 
-
 /*----------------------------------------------------------------------------*
 UNIFORM DISTRIBUTION
 
@@ -99,7 +98,7 @@ EXIT:  'Uniform' contains a random number uniformly distributed in the
 
 dec Uniform(dec a, dec b)
 {
-  return Rand()*(b-a)+a;
+  return Rand() * (b - a) + a;
 }
 
 /*----------------------------------------------------------------------------*
@@ -121,17 +120,23 @@ EXIT:  'Expon' contains the next Poisson time interval.
 #define LIMITG 10
 
 dec Expon(dec lambda)
-{ dec r, expdt;
+{
+  dec r, expdt;
 
-  while(1)                                   // Generate a uniformly distributed
-  { r = Rand(); if(r==0) continue;           // random number.
+  while (1) // Generate a uniformly distributed
+  {
+    r = Rand();
+    if (r == 0)
+      continue; // random number.
 
-    expdt = -log(r);                         // Convert it to an exponential
-    if(expdt>LIMITG) continue;               // distribution and control its
-    if(expdt==0)     continue;               // range.
+    expdt = -log(r); // Convert it to an exponential
+    if (expdt > LIMITG)
+      continue; // distribution and control its
+    if (expdt == 0)
+      continue; // range.
 
-    return(expdt/lambda);                    // Scale and return the next time
-  }                                          // interval.
+    return (expdt / lambda); // Scale and return the next time
+  }                          // interval.
 }
 
 /* NOTE: This routine must make practical concessions to the reality of
@@ -164,15 +169,18 @@ standard deviation.
 */
 
 dec Gauss(dec mu, dec sigma)
-{ dec v1, v2, w;
+{
+  dec v1, v2, w;
 
-  do { v1 = 2.*Rand() - 1.;                  //Generate a point within the
-       v2 = 2.*Rand() - 1.;                  //unit circle.
-       w = v1*v1 + v2*v2; }
-  while(w>1 || w==0);
+  do
+  {
+    v1 = 2. * Rand() - 1.; //Generate a point within the
+    v2 = 2. * Rand() - 1.; //unit circle.
+    w = v1 * v1 + v2 * v2;
+  } while (w > 1 || w == 0);
 
-  w = v2 * sqrt(-2.*log(w)/w);               //Return the normal deviate.
-  return mu + w*sigma;
+  w = v2 * sqrt(-2. * log(w) / w); //Return the normal deviate.
+  return mu + w * sigma;
 }
 
 /* NOTE: The routine uses the polar method due to G.E.P.Box, M.E.Muller, and
@@ -201,7 +209,7 @@ the mean and standard deviation of the underlying normal distribution.
 
 dec LogNormal(dec mu, dec sigma)
 {
-  return exp(mu + sigma*Gauss(0., 1.));
+  return exp(mu + sigma * Gauss(0., 1.));
 }
 
 /*----------------------------------------------------------------------------*
@@ -227,7 +235,7 @@ further.
 
 dec Cauchy(dec mu, dec sigma)
 {
-  return mu + sigma*tan(PI*(Rand()-0.5));
+  return mu + sigma * tan(PI * (Rand() - 0.5));
 }
 
 /*----------------------------------------------------------------------------*
@@ -261,58 +269,84 @@ char msg102[] = "E102. Parameter %d does not contain a simple numeric"
 char msg103[] = "E103. Parameter %d (%s) is not a recognized name.\n";
 
 gparam(int argc, char *argv[])
-{ static int lines;
+{
+  static int lines;
   int i, j, k, m, n;
-  char str[STR+1], *cval;
+  char str[STR + 1], *cval;
   dec val, atof();
 
-  for(i=1; i<argc; i++)                      //Advance to the next parameter.
-  { n = strlen(argv[i]); if(n<=0) continue;
+  for (i = 1; i < argc; i++) //Advance to the next parameter.
+  {
+    n = strlen(argv[i]);
+    if (n <= 0)
+      continue;
 
-    for(k=n-1; k>=0; k--)                    //Scan for the beginning of the
-      if(argv[i][k]=='=') break;             //parameter value and issue an
-    if(k<0)                                  //error message if no equal signs
-    { printf(msg101, i, argv[i]);            //are to be found.
-      continue; }
+    for (k = n - 1; k >= 0; k--) //Scan for the beginning of the
+      if (argv[i][k] == '=')
+        break; //parameter value and issue an
+    if (k < 0) //error message if no equal signs
+    {
+      printf(msg101, i, argv[i]); //are to be found.
+      continue;
+    }
     k += 1;
 
-    for(m=n=0, j=k; argv[i][j]; j++)         //Make sure the parameter value is
-    { if(argv[i][j]=='-' && j==k) continue;  //a simple decimal number.
-      if(argv[i][j]>='0' && argv[i][j]<='9') { m += 1; continue; }
-      if(argv[i][j]=='.')                    { n += 1; continue; }
-      break; }
-
-    if(argv[i][j] || m<1 || n>1)             //If it is not, issue an error
-    { printf(msg102, i, &argv[i][k]);        //message and skip processing it.
-      continue; }
-
-    cval = &argv[i][k];                      //Otherwise convert it to internal
-    val  = atof(cval);                       //form.
-
-    for(k=0; ; k+=j+1)                       //Begin looping through all names.
+    for (m = n = 0, j = k; argv[i][j]; j++) //Make sure the parameter value is
     {
-      for(j=0; j<STR && argv[i][k+j]; j++)   //Copy the next name until an
-      { if(argv[i][k+j]=='=') break;         //equal sign is encountered.
-        str[j] = argv[i][k+j]; }
-      if(argv[i][k+j]==0) break;
+      if (argv[i][j] == '-' && j == k)
+        continue; //a simple decimal number.
+      if (argv[i][j] >= '0' && argv[i][j] <= '9')
+      {
+        m += 1;
+        continue;
+      }
+      if (argv[i][j] == '.')
+      {
+        n += 1;
+        continue;
+      }
+      break;
+    }
+
+    if (argv[i][j] || m < 1 || n > 1) //If it is not, issue an error
+    {
+      printf(msg102, i, &argv[i][k]); //message and skip processing it.
+      continue;
+    }
+
+    cval = &argv[i][k]; //Otherwise convert it to internal
+    val = atof(cval);   //form.
+
+    for (k = 0;; k += j + 1) //Begin looping through all names.
+    {
+      for (j = 0; j < STR && argv[i][k + j]; j++) //Copy the next name until an
+      {
+        if (argv[i][k + j] == '=')
+          break; //equal sign is encountered.
+        str[j] = argv[i][k + j];
+      }
+      if (argv[i][k + j] == 0)
+        break;
       str[j] = 0;
 
-      for(n=0; pntab[n]; n++)                //Search the table of parameter
-        if(strcmp(pntab[n], str)==0) break;  //names for a matching entry.
+      for (n = 0; pntab[n]; n++) //Search the table of parameter
+        if (strcmp(pntab[n], str) == 0)
+          break; //names for a matching entry.
 
-      if(pntab[n]==0)                        //Issue an error message if the
-      { printf(msg103, i, str);              //name is not in the table.
-        continue; }
+      if (pntab[n] == 0) //Issue an error message if the
+      {
+        printf(msg103, i, str); //name is not in the table.
+        continue;
+      }
 
-      *patab[n] = val;                       //Set the parameter, display its
-      printf(msg001, str, cval);             //name and value, and repeat.
+      *patab[n] = val;           //Set the parameter, display its
+      printf(msg001, str, cval); //name and value, and repeat.
       lines += 1;
     }
   }
-  if(lines) printf("\n");                    //Leave a blank line at at the
-}                                            //end if anything was printed.
-
-
+  if (lines)
+    printf("\n"); //Leave a blank line at at the
+} //end if anything was printed.
 
 /*----------------------------------------------------------------------------*
 TIME FORMATTING
@@ -328,22 +362,27 @@ EXIT:  'Tval' points to a formatted version of 'tval'. This is valid for the
 
 #define SNUM 10
 
-static int  snum;
+static int snum;
 static char sval[SNUM][100];
-static dec  tunit[] = { 365.25, 24, 60, 60, 1000, 1000, 1000, 1000, 0 };
-static char *tstr[] = { "year", "day", "hour", "minute", "second",
-  "millisecond", "microsecond", "nanosecond", "femptosecond" };
+static dec tunit[] = {365.25, 24, 60, 60, 1000, 1000, 1000, 1000, 0};
+static char *tstr[] = {"year", "day", "hour", "minute", "second",
+                       "millisecond", "microsecond", "nanosecond", "femptosecond"};
 
 char *Tval(dec tval)
-{ int i;
+{
+  int i;
 
-  if(tval==0)
+  if (tval == 0)
     i = 4;
-  else for(i=0; tval<1.0 && tunit[i]; i++)
-    tval *= tunit[i];
+  else
+    for (i = 0; tval < 1.0 && tunit[i]; i++)
+      tval *= tunit[i];
 
-  sprintf(sval[snum], "%.2g %s%s", tval, tstr[i], &"s"[tval==1]);
-  i = snum; snum += 1; if(snum==SNUM) snum = 0;
+  sprintf(sval[snum], "%.2g %s%s", tval, tstr[i], &"s"[tval == 1]);
+  i = snum;
+  snum += 1;
+  if (snum == SNUM)
+    snum = 0;
 
   return sval[i];
 }
@@ -363,10 +402,19 @@ EXIT:  'Earliest' contains the index of the earliest time, selected from
          vector 'subset'.
 */
 int Earliest(dec tab[])
-{ int i, m; dec x, w;
+{
+  int i, m;
+  dec x, w;
 
-  for(x=100000000,m=i=0; i<=(MaxE); i++)
-    { w = tab[i]; if(x>w && w>=T0) { x = w; m = i; } }
+  for (x = 100000000, m = i = 0; i <= (MaxE); i++)
+  {
+    w = tab[i];
+    if (x > w && w >= T0)
+    {
+      x = w;
+      m = i;
+    }
+  }
 
   return m;
 }
@@ -412,10 +460,9 @@ int DisplayParam(FILE *pf)
 
   fprintf(pf, "Parameters:");
 
-  for(i=0; patab[i]; i++)
+  for (i = 0; patab[i]; i++)
     fprintf(pf, " %s=%g", pntab[i], *patab[i]);
 
   fprintf(pf, "\n");
   return 0;
 }
-

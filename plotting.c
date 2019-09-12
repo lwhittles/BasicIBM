@@ -804,4 +804,3 @@ This ...
 * fclose(plot);
 *
 */
-

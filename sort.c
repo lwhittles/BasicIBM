@@ -43,23 +43,33 @@ EXIT:  'sort' indexes the first element in the sorted list, which ends with a
 static int *P, pcurr, pprev, count;
 
 int sort(int list[], int p, int n)
-{ int i;
+{
+  int i;
 
-  P = list;                                  //Record the location of the list.
+  P = list; //Record the location of the list.
 
-  if(n==0) for(i=p; i; i=P[i],n++);          //Count the number of elements and
-  if(n==0||p==0) return 0;                   //return empty lists immediately.
+  if (n == 0)
+    for (i = p; i; i = P[i], n++)
+      ; //Count the number of elements and
+  if (n == 0 || p == 0)
+    return 0; //return empty lists immediately.
 
-  if(n==1) return p;                         //Do the same for single elements.
+  if (n == 1)
+    return p; //Do the same for single elements.
 
-  if(n==2)                                   //If the list contains only two
-  { if(order(p, P[p])<=0) return p;          //elements, sort it by inspection
-    i = P[p]; P[i] = p; P[p] = 0;            //(One and two element lists are
-    return i; }                              //the most common in applications
-                                             //like hashing.)
+  if (n == 2) //If the list contains only two
+  {
+    if (order(p, P[p]) <= 0)
+      return p; //elements, sort it by inspection
+    i = P[p];
+    P[i] = p;
+    P[p] = 0; //(One and two element lists are
+    return i;
+  } //the most common in applications
+    //like hashing.)
 
-  pcurr = p;                                 //Otherwise sort the list with the
-  return isort(n);                           //full algorithm.
+  pcurr = p;       //Otherwise sort the list with the
+  return isort(n); //full algorithm.
 }
 
 /*----------------------------------------------------------------------------*
@@ -135,29 +145,38 @@ int isort(int n)
 {
   int wp1, wp2, count1;
 
-// SORT A SINGLE ELEMENT
+  // SORT A SINGLE ELEMENT
 
-  if(n<=1)                                   //If a single element has been
-  { if(pcurr==0) return 0;                   //requested, initialize variables
-    wp1 = pcurr; count = 0;                  //and check for error in count.
+  if (n <= 1) //If a single element has been
+  {
+    if (pcurr == 0)
+      return 0; //requested, initialize variables
+    wp1 = pcurr;
+    count = 0; //and check for error in count.
 
-    do                                       //Scan forward in the list to
-    { pprev = pcurr; count += 1;             //find the longest string that
-      if ((pcurr=P[pcurr])==0) return wp1; } //is already in order.
-    while(order(pprev, pcurr)<=0);
+    do //Scan forward in the list to
+    {
+      pprev = pcurr;
+      count += 1; //find the longest string that
+      if ((pcurr = P[pcurr]) == 0)
+        return wp1;
+    } //is already in order.
+    while (order(pprev, pcurr) <= 0);
 
-    P[pprev] = 0;                            //Break this string from the
-    return wp1; }                            //rest of the list and return.
+    P[pprev] = 0; //Break this string from the
+    return wp1;
+  } //rest of the list and return.
 
-// SORT MORE THAN ONE ELEMENT
+  // SORT MORE THAN ONE ELEMENT
 
-  wp1 = isort(n/2);                          //Sort the first part of the list
-  if(n<=count) return wp1;                   //and return if the required
-  count1 = count;                            //amount was fortuitously sorted.
+  wp1 = isort(n / 2); //Sort the first part of the list
+  if (n <= count)
+    return wp1;   //and return if the required
+  count1 = count; //amount was fortuitously sorted.
 
-  wp2 = isort(n-count);                      //If it was not, then sort what
-  count += count1;                           //remains to be sorted on this
-  return imerge(wp1, wp2);                   //call and merge the two sublists.
+  wp2 = isort(n - count);  //If it was not, then sort what
+  count += count1;         //remains to be sorted on this
+  return imerge(wp1, wp2); //call and merge the two sublists.
 }
 
 /*----------------------------------------------------------------------------*
@@ -180,33 +199,46 @@ EXIT:  'imerge' indexes the first element of the merged list.
 */
 
 int imerge(int p, int q)
- {
- int pbeg;
+{
+  int pbeg;
 
- if(p==0) return q;                          //Handle cases where one or more
- if(q==0) return p;                          //of the lists is null.
+  if (p == 0)
+    return q; //Handle cases where one or more
+  if (q == 0)
+    return p; //of the lists is null.
 
- pbeg = p;                                   //Save an index to the beginning
- if(order(p,q)<=0) goto scanp;               //of the list and enter the
- pbeg = q;                                   //proper scanning routine.
+  pbeg = p; //Save an index to the beginning
+  if (order(p, q) <= 0)
+    goto scanp; //of the list and enter the
+  pbeg = q;     //proper scanning routine.
 
- scans:                                      //Scan for a secondary element
-   do { pprev = q;                           //greater than or equal to the
-        if ((q=P[q])==0) goto ends; }        //current primary element and mend
-   while(order(p,q)>0);                      //the secondary list.
-   P[pprev] = p;
+scans: //Scan for a secondary element
+  do
+  {
+    pprev = q; //greater than or equal to the
+    if ((q = P[q]) == 0)
+      goto ends;
+  }                        //current primary element and mend
+  while (order(p, q) > 0); //the secondary list.
+  P[pprev] = p;
 
- scanp:                                      //Scan for a primary element
-   do { pprev = p;                           //greater than the current
-        if ((p=P[p])==0) goto endp; }        //secondary element, mend the
-   while(order(p,q)<=0);                     //primary list, and repeat.
-   P[pprev] = q; goto scans;
+scanp: //Scan for a primary element
+  do
+  {
+    pprev = p; //greater than the current
+    if ((p = P[p]) == 0)
+      goto endp;
+  }                         //secondary element, mend the
+  while (order(p, q) <= 0); //primary list, and repeat.
+  P[pprev] = q;
+  goto scans;
 
- endp: p = q;                                //Attach any remaining elements,
- ends: P[pprev] = p;                         //which need not be scanned and
-   return pbeg;                              //return the merged list.
- }
-
+endp:
+  p = q; //Attach any remaining elements,
+ends:
+  P[pprev] = p; //which need not be scanned and
+  return pbeg;  //return the merged list.
+}
 
 /*
 CLARENCE LEHMAN, MARCH 1978.
@@ -230,4 +262,3 @@ NOTE:  I created this particular algorithm for the early microcomputers and have
 used it ever since. Its present form was my very first C program.  I would code
 it a little differently now, but that recoding would not affect its speed.
 */
-

@@ -313,15 +313,14 @@ number of groups, and weakly on them.
     0   1   2   3   4   5   6    Clowest[i]
     4   4   4   4   4   4   3    E[i]
 */
-#define mA   indiv+1           //Maximum population size
+#define mA indiv + 1 //Maximum population size
 //#define nC   3               //Maximum number of groups in 'C'. NUK;UK
-static int   Clowest[nC+2];  //Array of groups.
-static int   Emptyc[nC+2];   //Number of empty cells trailing each group.
-static dec   V[nC+2];        //Maximum probability in each group.
-static int   nA = 0;         //Current number active in 'A'.
+static int Clowest[nC + 2]; //Array of groups.
+static int Emptyc[nC + 2];  //Number of empty cells trailing each group.
+static dec V[nC + 2];       //Maximum probability in each group.
+static int nA = 0;          //Current number active in 'A'.
 //static int   emax  = 5;    //Maximum number of empty slots per group.
 //static dec   draws = 0;    //Number of random draws.
-
 
 /*------------------------------------------------------------------------------
 1. SELECT INDIVIDUAL
@@ -338,19 +337,32 @@ EXIT:  'CCsel' indexes the individual selected. If zero, the group is empty.
 */
 
 int CCsel(int k)
-{ int h, n; dec r;
-  if(Clowest[0]==0||k>=nC) { return 0;}         //Guard against null cases.
-  h = Clowest[k+1]-Clowest[k]-Emptyc[k];     //Determine how many occupy the  
-  if(h<=0) { return 0; }                        //group.
-   while(1)                                   //Select an individual randomly
-    { n = Clowest[k]+h*Rand();               //and use it if it corresponds to
-      if(A[n].id==0) { return 0;}  //Skip deleted individuals
-      return n;      
+{
+  int h, n;
+  dec r;
+  if (Clowest[0] == 0 || k >= nC)
+  {
+    return 0;
+  }                                            //Guard against null cases.
+  h = Clowest[k + 1] - Clowest[k] - Emptyc[k]; //Determine how many occupy the
+  if (h <= 0)
+  {
+    return 0;
+  }         //group.
+  while (1) //Select an individual randomly
+  {
+    n = Clowest[k] + h * Rand(); //and use it if it corresponds to
+    if (A[n].id == 0)
+    {
+      return 0;
+    } //Skip deleted individuals
+    return n;
 
-      /*if(A[n].v==V[k]){return n;}            //the maximal probability.      
+    /*if(A[n].v==V[k]){return n;}            //the maximal probability.      
       r = Rand();                            //Otherwise use it only in propor-
-      if(r<A[n].v/V[k]) {return n; } */        //tion to its relative probability.
-    }
+      if(r<A[n].v/V[k]) {return n; } */
+    //tion to its relative probability.
+  }
 } //Tendai: Note that the relative probability allows one to rescale the probabilities to between 0 and 1 instead of between 0 and maximum probability.
 
 /*------------------------------------------------------------------------------
@@ -393,47 +405,73 @@ example of how it works:
 */
 
 int CCadd(int k)
-{ int i, m, n, d,j;
-  if(Clowest[0]==0) return 0;                //Guard against null cases.
-  if(nA>=mA)        return 0;
-  if(Aw.v>V[k]) Error(831.0);                //Guard against invalid additions.
+{
+  int i, m, n, d, j;
+  if (Clowest[0] == 0)
+    return 0; //Guard against null cases.
+  if (nA >= mA)
+    return 0;
+  if (Aw.v > V[k])
+    Error(831.0); //Guard against invalid additions.
 
-  for(d=0; k-d>=0||k+d+1<=nC; d++)           //Search forward and backward
-  { i = k-d;   if(i>=0  && Emptyc[i]) break; //simultaneously for the nearest
-    i = k+d+1; if(i<=nC && Emptyc[i]) break; //group with an empty slot.
-    i = -1; }
-//printf("i=%d,k=%d, Emptyc[k]=%d\n",i,k,Emptyc[k]); 
-  if(i<0) return 0;                          
-  
-  if(k<=i && i<=nC)                          //If there is a slot at the present
-  { j=i;
-	for(j=i; j>=k; j--)                         //location, use it, or if forward,
-    {//printf("j=%d\n",j); 
-	Emptyc[j] -= 1; 
-      m = Clowest[j+1]-Emptyc[j]-1;          //cascade it back to the current
-//printf("m=%d,j=%d,k=%d, Clowest[j+1]=%d,Clowest[j]=%d,Chighest[k]=%d,Emptyc[j]=%d\n",m,j,k,Clowest[j+1],Clowest[j],Clowest[j+1]-Emptyc[j],Emptyc[j]); 
-      if(j==k) { nA += 1; 			
-		      return m; }        //location.
-      n = Clowest[j]; if(m!=n) Transfer(m, n); //Swap position
-      Emptyc[j-1] += 1;  Clowest[j] += 1; 
+  for (d = 0; k - d >= 0 || k + d + 1 <= nC; d++) //Search forward and backward
+  {
+    i = k - d;
+    if (i >= 0 && Emptyc[i])
+      break; //simultaneously for the nearest
+    i = k + d + 1;
+    if (i <= nC && Emptyc[i])
+      break; //group with an empty slot.
+    i = -1;
+  }
+  //printf("i=%d,k=%d, Emptyc[k]=%d\n",i,k,Emptyc[k]);
+  if (i < 0)
+    return 0;
 
-	} 
-	}  
-  
-  if(i<k && i>=0)                            //Otherwise, if there is an open
-  { j=i;
-for(j=i; j<=k; j++)                         //earlier in the list of
-    { Emptyc[j] -= 1; 
-      m = Clowest[j+1]-1;                    //groups, cascade it forward
-      if(j==k) { nA += 1; return m; }        //to the current location.
-      n = Clowest[j+2]-1; 
-	//n=Clowest[2+1]-Emptyc[j+1];
-	if(m!=n) Transfer(m, n);
-      Emptyc[j+1] += 1; Clowest[j+1] -= 1; } }
+  if (k <= i && i <= nC) //If there is a slot at the present
+  {
+    j = i;
+    for (j = i; j >= k; j--) //location, use it, or if forward,
+    {                        //printf("j=%d\n",j);
+      Emptyc[j] -= 1;
+      m = Clowest[j + 1] - Emptyc[j] - 1; //cascade it back to the current
+                                          //printf("m=%d,j=%d,k=%d, Clowest[j+1]=%d,Clowest[j]=%d,Chighest[k]=%d,Emptyc[j]=%d\n",m,j,k,Clowest[j+1],Clowest[j],Clowest[j+1]-Emptyc[j],Emptyc[j]);
+      if (j == k)
+      {
+        nA += 1;
+        return m;
+      } //location.
+      n = Clowest[j];
+      if (m != n)
+        Transfer(m, n); //Swap position
+      Emptyc[j - 1] += 1;
+      Clowest[j] += 1;
+    }
+  }
 
-  return 0;                                  //Indicate the list is full.
+  if (i < k && i >= 0) //Otherwise, if there is an open
+  {
+    j = i;
+    for (j = i; j <= k; j++) //earlier in the list of
+    {
+      Emptyc[j] -= 1;
+      m = Clowest[j + 1] - 1; //groups, cascade it forward
+      if (j == k)
+      {
+        nA += 1;
+        return m;
+      } //to the current location.
+      n = Clowest[j + 2] - 1;
+      //n=Clowest[2+1]-Emptyc[j+1];
+      if (m != n)
+        Transfer(m, n);
+      Emptyc[j + 1] += 1;
+      Clowest[j + 1] -= 1;
+    }
+  }
+
+  return 0; //Indicate the list is full.
 }
-
 
 /*------------------------------------------------------------------------------
 3. DELETE INDIVIDUAL
@@ -460,15 +498,30 @@ worth it. That is something for possible later evaluation.
 */
 
 int CCdel(int k, int n)
-{ int h, i, m;
-  if(Clowest[0]==0||k>nC) return 0;                  //Guard against null cases.
-  h = Clowest[k+1]-Clowest[k]; if(h<=0) return 0;
-  if(Clowest[k+1]-Clowest[k]-Emptyc[k]<0) return 0;  //Skip empty groups:Tendai
-  Emptyc[k] += 1; m = Clowest[k+1]-Emptyc[k];        //Find the highest occupied index in group k i.e m  
-  if(n==m||m==0)                                     //If n is not the highest indexed individual corrected from n!=m on 06/10/16
-    {A[n].id=0; clear_times(n);}                     //Otherwise clear n's ID and clear all event
-  else{Transfer(n, m); clear_times(m); A[m].id=0;}   //tranfer m into deleted position and update index times
-  nA -= 1; return 1;                                 //Return with success.
+{
+  int h, i, m;
+  if (Clowest[0] == 0 || k > nC)
+    return 0; //Guard against null cases.
+  h = Clowest[k + 1] - Clowest[k];
+  if (h <= 0)
+    return 0;
+  if (Clowest[k + 1] - Clowest[k] - Emptyc[k] < 0)
+    return 0; //Skip empty groups:Tendai
+  Emptyc[k] += 1;
+  m = Clowest[k + 1] - Emptyc[k]; //Find the highest occupied index in group k i.e m
+  if (n == m || m == 0)           //If n is not the highest indexed individual corrected from n!=m on 06/10/16
+  {
+    A[n].id = 0;
+    clear_times(n);
+  } //Otherwise clear n's ID and clear all event
+  else
+  {
+    Transfer(n, m);
+    clear_times(m);
+    A[m].id = 0;
+  } //tranfer m into deleted position and update index times
+  nA -= 1;
+  return 1; //Return with success.
 }
 
 /*Added by Tendai
@@ -481,9 +534,11 @@ EXIT:  'A[n].t' All times are set to zero
        
  */
 int clear_times(int n)
-{ int i;
-  for(i=0; i<MaxT; i++) A[n].t[i] = 0;
-return 1;
+{
+  int i;
+  for (i = 0; i < MaxT; i++)
+    A[n].t[i] = 0;
+  return 1;
 }
 
 /*------------------------------------------------------------------------------
@@ -498,12 +553,15 @@ EXIT:  'CCgroup_size' calculates and returns the size of group k. If zero, the g
 */
 
 int CCgroup_size(int k)
-{int h;
-  if(Clowest[0]==0||k>=nC) { return 0;}         //Guard against null cases.
-  h = Clowest[k+1]-Clowest[k]-Emptyc[k];     //Determine how many occupy the group  
-return h;
+{
+  int h;
+  if (Clowest[0] == 0 || k >= nC)
+  {
+    return 0;
+  }                                            //Guard against null cases.
+  h = Clowest[k + 1] - Clowest[k] - Emptyc[k]; //Determine how many occupy the group
+  return h;
 }
-
 
 /* CLARENCE LEHMAN AND ADRIENNE KEEN, JUNE 2011.
 
@@ -520,5 +578,3 @@ probabilities within groups. The founding idea for the algorithm was by AK and
 CL coded the final version.
 
 */
-
-

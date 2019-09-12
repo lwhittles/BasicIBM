@@ -13,21 +13,29 @@ WORK:  'init' is 0 if this routine has never been called, 1 otherwise.
        'target' is the latest time for the next birth.
 */
 BirthG(dec w)
-{ static dec target, init;
+{
+  static dec target, init;
 
-  if(init==0) { target = t; init = 1; }   //Capture the time on the first call.
+  if (init == 0)
+  {
+    target = t;
+    init = 1;
+  } //Capture the time on the first call.
 
-  Birth(CCadd(UK),t);                     //Create someone born in the UK.
+  Birth(CCadd(UK), t); //Create someone born in the UK.
 
-  if(w<0||w>ypb) Error(851.);             //Generate a random variation in the
-  if(w>0) w *= Rand();                    //time of next birth.
+  if (w < 0 || w > ypb)
+    Error(851.); //Generate a random variation in the
+  if (w > 0)
+    w *= Rand(); //time of next birth.
 
-  if(target<t) target = t;                //Schedule an event for a bounded
-  A[PBIRTH].pending = pBirth;             //distance in the future.
-  EventSchedule(BIRTH,target+ypb-w);
+  if (target < t)
+    target = t;               //Schedule an event for a bounded
+  A[PBIRTH].pending = pBirth; //distance in the future.
+  EventSchedule(BIRTH, target + ypb - w);
 
-  target += ypb;                          //Advance the latest time for the
-}                                         //next event.
+  target += ypb; //Advance the latest time for the
+} //next event.
 /*
 Special considerations: The random number function 'Rand' should not generate
 values of precisely 1. Random number generators typically generated numbers

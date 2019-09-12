@@ -30,47 +30,55 @@ Note: Tendai for 1 gives back on avarage c.rate events per unit time. i.e observ
 */
 
 struct Clock
-{ int type;       //Type of clock (see above)
-  dec next;       //Scheduled time of the next tick
-  dec rate;       //Events per unit time, types 0-3 (see above)
-  dec rel;        //Relative width of uniform noise, types 2-3 (see above)
-  dec target;     //Latest time for the next tick, types 2-3 (see above)
-  dec *x,*y;      //Cumulative distribution, types 3-4 (see 'RandF')
-  int nxy; };     //Number of elements in 'x' and 'y', types 3-4 (see 'RandF')
-
+{
+  int type;   //Type of clock (see above)
+  dec next;   //Scheduled time of the next tick
+  dec rate;   //Events per unit time, types 0-3 (see above)
+  dec rel;    //Relative width of uniform noise, types 2-3 (see above)
+  dec target; //Latest time for the next tick, types 2-3 (see above)
+  dec *x, *y; //Cumulative distribution, types 3-4 (see 'RandF')
+  int nxy;
+}; //Number of elements in 'x' and 'y', types 3-4 (see 'RandF')
 
 struct Clock ClockTick(struct Clock c)
-{ dec v, w;
+{
+  dec v, w;
 
-  switch(c.type)
+  switch (c.type)
   {
-    case 0:                               //GENERAL CUMULATIVE DISTRIBUTION.
-       c.next = t+RandF(c.x,c.y,c.nxy,0.);
-       break;
+  case 0: //GENERAL CUMULATIVE DISTRIBUTION.
+    c.next = t + RandF(c.x, c.y, c.nxy, 0.);
+    break;
 
-    case 1: c.next = t+Expon(c.rate);     //FIXED TIME EXPONENTIAL.
-      break;
-//  case 3:                               //PERIODIC WITH GENERAL NOISE.
-//    w = c.rel;
-//    if(w<0||w>1) Error(851.);           //Generate a random variation in the
-//    if(w>0) w *=                        //timing, if requested.
-//      RandF(c.x,c.y,c.nxy,0.)/x[nxy-1];
-//    if(c.target<t) c.target  = t;
-//    v = 1./c.rate; c.target += v;       //Advance the latest time for the
-//    c.next = c.target-v*w;              //next event.
-//    break;
+  case 1:
+    c.next = t + Expon(c.rate); //FIXED TIME EXPONENTIAL.
+    break;
+    //  case 3:                               //PERIODIC WITH GENERAL NOISE.
+    //    w = c.rel;
+    //    if(w<0||w>1) Error(851.);           //Generate a random variation in the
+    //    if(w>0) w *=                        //timing, if requested.
+    //      RandF(c.x,c.y,c.nxy,0.)/x[nxy-1];
+    //    if(c.target<t) c.target  = t;
+    //    v = 1./c.rate; c.target += v;       //Advance the latest time for the
+    //    c.next = c.target-v*w;              //next event.
+    //    break;
 
-    case 4:                               //PERIODIC WITH UNIFORM NOISE.
-      w = c.rel;
-      if(w<0||w>1) Error(851.);           //Generate a random variation in the
-      if(w>0) w *= Rand();                //timing, if requested.
-      if(c.target<t) c.target  = t;
-      v = 1./c.rate; c.target += v;       //Advance the latest time for the
-      c.next = c.target-v*w;              //next event.
-      break;
+  case 4: //PERIODIC WITH UNIFORM NOISE.
+    w = c.rel;
+    if (w < 0 || w > 1)
+      Error(851.); //Generate a random variation in the
+    if (w > 0)
+      w *= Rand(); //timing, if requested.
+    if (c.target < t)
+      c.target = t;
+    v = 1. / c.rate;
+    c.target += v;             //Advance the latest time for the
+    c.next = c.target - v * w; //next event.
+    break;
 
-
-    default: Error(852.); }
+  default:
+    Error(852.);
+  }
 
   return c;
 }

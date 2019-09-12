@@ -19,80 +19,79 @@ processes running in the system, and so forth.
 */
 
 static char *message[] =
-{
-  "F387%s  Warning: An index value is out of range and has been ignored",
-  "F388%s  Warning: Array about the run out of space",
+    {
+        "F387%s  Warning: An index value is out of range and has been ignored",
+        "F388%s  Warning: Array about the run out of space",
 
-  "F501%s  This feature is not yet supported",
-  "F510%s  The file cannot be opened",
-  "F511%s  The file cannot be completely read",
-  "F512%s  The file cannot be completely written",
-  "F513%s  The file is not of valid format",
-  "F514%s  The file appears to be without data",
-  "F515%s  A file I/O index is incorrect",
-  "F516%s  A file I/O dimension is not positive",
-  "F517%s  A file I/O index is too large",
-  "F518%s  A file I/O index range is not divisible by the increment",
-  "F520%s  The file I/O transformation does not begin with 'x' or 'n'",
-  "F521%s  The file I/0 transformation would divide by zero",
-  "F522%s  The file I/0 transformation is syntactically incorrect",
-  "F523%s  A file I/0 column heading is incorrect",
-  "F524%s  A file I/0 index label is incorrect [must be 'a'-'z']",
-  "E525%s  The parameter is incorrect",
-  "F526%s  A file I/0 dimension is too large",
-  "F530%s  The file I/0 structure must have all indices first",
-  "F531%s  The file I/0 structure must have at least one data column",
-  "F532%s  The file has too many columns",
-  "F533%s  A file I/O field contains spurious characters",
-  "F534%s  A file I/0 index field is incorrect",
-  "F535%s  A file I/0 field is too large",
-  "F536%s  The file ended prematurely",
+        "F501%s  This feature is not yet supported",
+        "F510%s  The file cannot be opened",
+        "F511%s  The file cannot be completely read",
+        "F512%s  The file cannot be completely written",
+        "F513%s  The file is not of valid format",
+        "F514%s  The file appears to be without data",
+        "F515%s  A file I/O index is incorrect",
+        "F516%s  A file I/O dimension is not positive",
+        "F517%s  A file I/O index is too large",
+        "F518%s  A file I/O index range is not divisible by the increment",
+        "F520%s  The file I/O transformation does not begin with 'x' or 'n'",
+        "F521%s  The file I/0 transformation would divide by zero",
+        "F522%s  The file I/0 transformation is syntactically incorrect",
+        "F523%s  A file I/0 column heading is incorrect",
+        "F524%s  A file I/0 index label is incorrect [must be 'a'-'z']",
+        "E525%s  The parameter is incorrect",
+        "F526%s  A file I/0 dimension is too large",
+        "F530%s  The file I/0 structure must have all indices first",
+        "F531%s  The file I/0 structure must have at least one data column",
+        "F532%s  The file has too many columns",
+        "F533%s  A file I/O field contains spurious characters",
+        "F534%s  A file I/0 index field is incorrect",
+        "F535%s  A file I/0 field is too large",
+        "F536%s  The file ended prematurely",
 
-  "E609%s  The state is out of range",
-  "E610%s  The number of individuals is incorrect",
-  "E611%s  The individual is already in the state to be set",
-  "E612%s  Time of death is in error",
-  "E616%s  The strain ID is incorrect",
-  "E617%s  The time since infection is incorrect",
-  "E618%s  Sorting of times is in error",
-  "E619%s  Time of reporting is zero",
-  "E620%s  Time to disease is in error",
-  "E621%s  A cumulative table is not monotonically increasing",
-  "E622%s  A cumulative table is not bounded by 0 and 1",
+        "E609%s  The state is out of range",
+        "E610%s  The number of individuals is incorrect",
+        "E611%s  The individual is already in the state to be set",
+        "E612%s  Time of death is in error",
+        "E616%s  The strain ID is incorrect",
+        "E617%s  The time since infection is incorrect",
+        "E618%s  Sorting of times is in error",
+        "E619%s  Time of reporting is zero",
+        "E620%s  Time to disease is in error",
+        "E621%s  A cumulative table is not monotonically increasing",
+        "E622%s  A cumulative table is not bounded by 0 and 1",
 
-  "E714%s  The kernel designator is incorrect",
-  "E734%s  The event number is out of range",
-  "E735%s  An event to be scheduled is already scheduled",
-  "E736%s  An event to be cancelled is not yet scheduled",
-  "E737%s  A new event would be scheduled in the past",
-  "E742%s  Attempt to initialize when the time bins are not empty",
-  "E753%s  A binary search table is invalid",
-  "E754%s  A cumulative table has gone beyond 1",
+        "E714%s  The kernel designator is incorrect",
+        "E734%s  The event number is out of range",
+        "E735%s  An event to be scheduled is already scheduled",
+        "E736%s  An event to be cancelled is not yet scheduled",
+        "E737%s  A new event would be scheduled in the past",
+        "E742%s  Attempt to initialize when the time bins are not empty",
+        "E753%s  A binary search table is invalid",
+        "E754%s  A cumulative table has gone beyond 1",
 
+        "F818%s  An existing event cannot be found in the time bins",
+        "F819%s  The event counter has fallen negative",
+        "F820%s  The event list has a broken link",
+        "F840%s  An internal inconsistency during file I/O has been detected",
+        "F850%s  A birth occurred before the present",
+        "F851%s  The width of a clock interval is too large",
+        "F852%s  The specified type of clock is not supported",
+        "F853%s  A progression occurred before the present",
 
-  "F818%s  An existing event cannot be found in the time bins",
-  "F819%s  The event counter has fallen negative",
-  "F820%s  The event list has a broken link",
-  "F840%s  An internal inconsistency during file I/O has been detected",
-  "F850%s  A birth occurred before the present",
-  "F851%s  The width of a clock interval is too large",
-  "F852%s  The specified type of clock is not supported",
-  "F853%s  A progression occurred before the present",
+        "F911%s  Not enough memory is available",
+        "F920%s  An index is out of range",
+        "F921%s  A pointer is null",
+        "F922%s  A switch index is incorrect",
 
-  "F911%s  Not enough memory is available",
-  "F920%s  An index is out of range",
-  "F921%s  A pointer is null",
-  "F922%s  A switch index is incorrect",
-
-  "F996%s  System bus error",
-  "F997%s  System segmentation error",
-  "F998%s  Unsupported error number",
-   0 };
+        "F996%s  System bus error",
+        "F997%s  System segmentation error",
+        "F998%s  Unsupported error number",
+        0};
 
 static char *fixed[] =
-{ "%c%s  %s defined in the source code",
-  "F999%s  Processing cannot continue",
-   0 };
+    {"%c%s  %s defined in the source code",
+     "F999%s  Processing cannot continue",
+     0};
 
 /*----------------------------------------------------------------------------*
 ISSUE MESSAGE
@@ -164,59 +163,83 @@ typedef double dec;
 #include <math.h>
 
 #define LINE 1024
-#define LNUM   32
-#define NPAR    3
+#define LNUM 32
+#define NPAR 3
 
-static int dropnum(char*);
-static int matched(char*, char*);
-static msgout(int, char*, char *pc[NPAR], char pn[NPAR][LNUM]);
+static int dropnum(char *);
+static int matched(char *, char *);
+static msgout(int, char *, char *pc[NPAR], char pn[NPAR][LNUM]);
 static nformat(char[], dec);
 
-int Error3(dec n, char *p1,dec v1, char *p2,dec v2, char *p3,dec v3)
+int Error3(dec n, char *p1, dec v1, char *p2, dec v2, char *p3, dec v3)
 {
-  int i; char *s, *pc[NPAR], pn[NPAR][LNUM], num[LNUM], line[LINE];
+  int i;
+  char *s, *pc[NPAR], pn[NPAR][LNUM], num[LNUM], line[LINE];
 
-  if(n<100||n>=999.5)                        //Make sure the message number is
-  { p1 = "`"; v1 = n; n = 998; p2 = 0; }     //within bounds.
+  if (n < 100 || n >= 999.5) //Make sure the message number is
+  {
+    p1 = "`";
+    v1 = n;
+    n = 998;
+    p2 = 0;
+  } //within bounds.
 
-  for(i=0; i<NPAR; i++)                      //Make the array of parameters
-  { pc[i] = 0; pn[i][0] = 0; }               //null.
+  for (i = 0; i < NPAR; i++) //Make the array of parameters
+  {
+    pc[i] = 0;
+    pn[i][0] = 0;
+  } //null.
 
-  sprintf(num, "%03.1f", n);                 //Format the message number and
-  if(num[4]=='0') num[3] = 0;                //clear any trailing '.0'.
+  sprintf(num, "%03.1f", n); //Format the message number and
+  if (num[4] == '0')
+    num[3] = 0; //clear any trailing '.0'.
 
-  pc[0] = p1; pc[1] = p2; pc[2] = p3;        //Format the parameter strings and
-  if(pc[0]) nformat(pn[0], v1);              //numbers in the array.
-  if(pc[1]) nformat(pn[1], v2);
-  if(pc[2]) nformat(pn[2], v3);
+  pc[0] = p1;
+  pc[1] = p2;
+  pc[2] = p3; //Format the parameter strings and
+  if (pc[0])
+    nformat(pn[0], v1); //numbers in the array.
+  if (pc[1])
+    nformat(pn[1], v2);
+  if (pc[2])
+    nformat(pn[2], v3);
 
-  for(i=0; message[i]; i++)                  //Scan the table for a message
-    if(matched(message[i], num)) break;      //which has a matching number.
+  for (i = 0; message[i]; i++) //Scan the table for a message
+    if (matched(message[i], num))
+      break; //which has a matching number.
 
-  if(message[i])                             //If there is one, format it with
-  { sprintf(line, message[i], &num[3]);      //any parameters supplied.
-    msgout(2, line, pc,pn); }
+  if (message[i]) //If there is one, format it with
+  {
+    sprintf(line, message[i], &num[3]); //any parameters supplied.
+    msgout(2, line, pc, pn);
+  }
 
-  else                                       //If none can be found, issue a
-  { s = n<200? "Status":                     //general purpose message.
-        n<300? "Information":
-        n<500? "Warning": "Failure";
+  else //If none can be found, issue a
+  {
+    s = n < 200 ? "Status" : //general purpose message.
+            n < 300 ? "Information" : n < 500 ? "Warning" : "Failure";
     sprintf(line, fixed[0], s[0], num, s);
-    msgout(2, line, pc,pn); }
+    msgout(2, line, pc, pn);
+  }
 
-  if(n>=500)                                 //Either return to the caller or
-  { s = num[3]? "  ": "";                    //display the stack and abort the
-    sprintf(line, fixed[1], s);              //entire program, depending on the
-    pc[0] = 0; msgout(0, line, pc,pn);       //error code.
-    fprintf(stderr,"\n"); ErrorTrace();
-    while(1) Failure(3); }
+  if (n >= 500) //Either return to the caller or
+  {
+    s = num[3] ? "  " : "";     //display the stack and abort the
+    sprintf(line, fixed[1], s); //entire program, depending on the
+    pc[0] = 0;
+    msgout(0, line, pc, pn); //error code.
+    fprintf(stderr, "\n");
+    ErrorTrace();
+    while (1)
+      Failure(3);
+  }
   return 0;
 }
 
-int Error2(dec n, char *p1,dec v1,
-                  char *p2,dec v2) { return Error3(n, p1,v1, p2,v2, 0,0); }
-int Error1(dec n, char *p1,dec v1) { return Error3(n, p1,v1, 0,0,   0,0); }
-int Error (dec n)                  { return Error3(n, 0,0,   0,0,   0,0); }
+int Error2(dec n, char *p1, dec v1,
+           char *p2, dec v2) { return Error3(n, p1, v1, p2, v2, 0, 0); }
+int Error1(dec n, char *p1, dec v1) { return Error3(n, p1, v1, 0, 0, 0, 0); }
+int Error(dec n) { return Error3(n, 0, 0, 0, 0, 0, 0); }
 
 /*----------------------------------------------------------------------------*
 INTERNAL SERVICE ROUTINES
@@ -234,7 +257,7 @@ EXIT:  'matched' defines the result.
 
 static int matched(char *p, char *q)
 {
-  return !strncmp(p+1, q, 3);
+  return !strncmp(p + 1, q, 3);
 }
 
 /* ---- DISPLAY TEXT
@@ -252,21 +275,28 @@ static msgout(int r, char *s, char *pc[NPAR], char pn[NPAR][LNUM])
 {
   char i, *s1, *s2;
 
-  for(; r>0; r--) fprintf(stderr,"\n");      //Display any separator lines.
+  for (; r > 0; r--)
+    fprintf(stderr, "\n"); //Display any separator lines.
 
-  for(i=0; i<NPAR && pc[i]; i++)             //If a text string is not marked,
-    if(pc[i][0]=='`')  pc[i] += 1;           //eliminate the number following.
-    else if(dropnum(pc[i])) pn[i][0] = 0;
+  for (i = 0; i < NPAR && pc[i]; i++) //If a text string is not marked,
+    if (pc[i][0] == '`')
+      pc[i] += 1; //eliminate the number following.
+    else if (dropnum(pc[i]))
+      pn[i][0] = 0;
 
-  s1 = s2 = "";                              //Setup parentheses to enclose any
-  if(pc[0]) { s1 = " (";  s2 = ")"; }        //parameters.
+  s1 = s2 = ""; //Setup parentheses to enclose any
+  if (pc[0])
+  {
+    s1 = " (";
+    s2 = ")";
+  } //parameters.
 
-  fprintf(stderr,"%s%s", s, s1);             //Display the parameters in
-  for(i=0; i<NPAR && pc[i]; i++)             //parentheses, if any parameters
-    fprintf(stderr,"%s%s", pc[i], pn[i]);    //were supplied.
-  fprintf(stderr,"%s.\n", s2);
+  fprintf(stderr, "%s%s", s, s1);          //Display the parameters in
+  for (i = 0; i < NPAR && pc[i]; i++)      //parentheses, if any parameters
+    fprintf(stderr, "%s%s", pc[i], pn[i]); //were supplied.
+  fprintf(stderr, "%s.\n", s2);
 
-  fflush(stdout);                            //Make sure the message is visible.
+  fflush(stdout); //Make sure the message is visible.
 }
 
 /* ---- CHECK FOR SPECIAL MARKS
@@ -279,15 +309,17 @@ EXIT:   'dropnum' is set if the string does not end with a continuation symbol
 */
 
 static int dropnum(char *s)
-{ int c;
+{
+  int c;
 
-  if(s==0 || s[0]==0) return 1;              //Check for null strings.
+  if (s == 0 || s[0] == 0)
+    return 1; //Check for null strings.
 
-  c = s[strlen(s)-1];                        //If the string ends with one of
-  if(c=='<'||c=='='||c=='>'||c==':')         //the continuation symbols, allow
-    return 0;                                //the number to be displayed.
+  c = s[strlen(s) - 1];                             //If the string ends with one of
+  if (c == '<' || c == '=' || c == '>' || c == ':') //the continuation symbols, allow
+    return 0;                                       //the number to be displayed.
 
-  return 1;                                  //Otherwise suppress the number.
+  return 1; //Otherwise suppress the number.
 }
 
 /* ---- FORMAT NUMBER
@@ -299,16 +331,16 @@ EXIT:  's' contains the formatted number.
 */
 
 #define EPSILON 0.000000001
-#define OMEGA    1000000000
+#define OMEGA 1000000000
 
 static nformat(char s[LNUM], dec v)
 {
-  if(fabs(v-(long int)v)<fabs(v)*EPSILON     //If this is a relatively small
-  && fabs(v)<OMEGA)                          //integer, format it directly.
+  if (fabs(v - (long int)v) < fabs(v) * EPSILON //If this is a relatively small
+      && fabs(v) < OMEGA)                       //integer, format it directly.
     sprintf(s, "%d", (int)v);
 
-  else                                       //Otherwise allow the use of
-    sprintf(s, "%g", v);                     //exponential notation.
+  else                   //Otherwise allow the use of
+    sprintf(s, "%g", v); //exponential notation.
 }
 
 /* ---- FAILURE OF THE PROGRAM
@@ -338,23 +370,28 @@ fatal errors.
 
 //#include <signal.h>
 //#include <execinfo.h>
-#define  PSTACK 50
+#define PSTACK 50
 
 //static __sighandler_t ErrBus() { Error(996.); return 0; }
 //static __sighandler_t ErrSeg() { Error(997.); return 0; }
 
 int ErrorInit()
-{ static int init;
-  if(init) return 0;
+{
+  static int init;
+  if (init)
+    return 0;
 
   //  signal(SIGBUS,  (__sighandler_t)ErrBus);   //Capture bus errors.
   //  signal(SIGSEGV, (__sighandler_t)ErrSeg);   //Capture segmentation errors.
 
-  init = 1; return 0;
+  init = 1;
+  return 0;
 }
 
 int ErrorTrace()
-{ int n; void *pstack[PSTACK];
+{
+  int n;
+  void *pstack[PSTACK];
 
   //  n = backtrace(pstack, PSTACK);
   //  backtrace_symbols_fd(pstack, n, 2);

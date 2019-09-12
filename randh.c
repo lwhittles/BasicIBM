@@ -103,22 +103,31 @@ typedef double decs;
 dec Val(), Rand();
 
 dec RandF(decs V[], decs P[], int n, dec g)
-{ int i; dec r, p, w;
+{
+  int i;
+  dec r, p, w;
 
-  if(V[0]>g  || V[n-1]<g)  Error(753.1);     //Check the bounds of both tables.
-  if(P[0]!=0 || P[n-1]!=1) Error(753.2);
+  if (V[0] > g || V[n - 1] < g)
+    Error(753.1); //Check the bounds of both tables.
+  if (P[0] != 0 || P[n - 1] != 1)
+    Error(753.2);
 
-  r = Rand();                                //Generate a uniform random value.
+  r = Rand(); //Generate a uniform random value.
   //printf("%f\t",r);   //FOR TESTING
 
-  if(g!=V[0])                                //Rescale the random value if only
-  { p = Val(1, g, V,P, 0,n-1);               //part of the distribution is to be
-    r = p + r*(1-p); }                       //sampled.
+  if (g != V[0]) //Rescale the random value if only
+  {
+    p = Val(1, g, V, P, 0, n - 1); //part of the distribution is to be
+    r = p + r * (1 - p);
+  } //sampled.
 
-  i = Loc(P, 0, n, r);                       //Pick a value from the portion of
-  w = P[i+1]-P[i];                           //the inverse cumulative distribution
-  if(w) w = (r-P[i])/w; else w = 1;          //that applies to the value of 'g'.
-  return V[i]-g + w*(V[i+1]-V[i]);
+  i = Loc(P, 0, n, r); //Pick a value from the portion of
+  w = P[i + 1] - P[i]; //the inverse cumulative distribution
+  if (w)
+    w = (r - P[i]) / w;
+  else
+    w = 1; //that applies to the value of 'g'.
+  return V[i] - g + w * (V[i + 1] - V[i]);
 }
 
 /* Note: This routine and the subroutines it calls are simple in their structure
@@ -174,16 +183,23 @@ EXIT:  'Val' contains the value of the function at point 'x'. If 'x' is
 */
 
 dec Val(int k, dec x, decs X[], decs Y[], int i0, int i1)
-{ int i; dec w;
+{
+  int i;
+  dec w;
 
-  if(x<=X[i0]) return Y[i0];                 //Handle variables outside of the
-  if(x>=X[i1]) return Y[i1];                 //normal range.
+  if (x <= X[i0])
+    return Y[i0]; //Handle variables outside of the
+  if (x >= X[i1])
+    return Y[i1]; //normal range.
 
-  i = Loc(X, i0, i1-i0+1, x);                //Bracket the independent variable.
+  i = Loc(X, i0, i1 - i0 + 1, x); //Bracket the independent variable.
 
-  w = X[i+1]-X[i];                           //Interpolate linearly within the
-  if(w) w = (x-X[i])/w; else w = 1;          //bracketed range, watching for.
-  return Y[i] + w*(Y[i+1]-Y[i]);             //discontinuities.
+  w = X[i + 1] - X[i]; //Interpolate linearly within the
+  if (w)
+    w = (x - X[i]) / w;
+  else
+    w = 1;                             //bracketed range, watching for.
+  return Y[i] + w * (Y[i + 1] - Y[i]); //discontinuities.
 }
 
 /*----------------------------------------------------------------------------*
@@ -205,9 +221,8 @@ EXIT:  'Loc' indexes the local pair of table entries containing 'v', such that
 
 int Loc(decs T[], int b, int n, dec v)
 {
-  int m = n/2 + n%2;
-  return m<=1? b: v<T[b+m-1]? Loc(T,b,m,v): Loc(T,b+m-1,n-m+1,v);
+  int m = n / 2 + n % 2;
+  return m <= 1 ? b : v < T[b + m - 1] ? Loc(T, b, m, v) : Loc(T, b + m - 1, n - m + 1, v);
 }
 
 // CLARENCE LEHMAN AND ADRIENNE KEEN, AUGUST 2010.
-

@@ -57,11 +57,11 @@ EXIT:  'Rand' contains the next random number in the sequence, uniformly
 static unsigned long seed;
 
 double Rand()
- {
- unsigned long RandInteger();
+{
+  unsigned long RandInteger();
 
- return((double)RandInteger() / 4294967296.);
- }
+  return ((double)RandInteger() / 4294967296.);
+}
 
 /*----------------------------------------------------------------------------*
 INITIALIZE TO A KNOWN STARTING POINT
@@ -99,10 +99,10 @@ EXIT:  The random sequence is initialized to 'k'.
 */
 
 unsigned long RandStart(unsigned long k)
- {
- seed = k;
- return(seed);
- }
+{
+  seed = k;
+  return (seed);
+}
 
 /*----------------------------------------------------------------------------*
 INITIALIZE TO AN ARBITRARY STARTING POINT
@@ -166,13 +166,13 @@ static unsigned long reverse();
 unsigned long time();
 
 unsigned long RandStartArb(unsigned long offset)
- {
- static unsigned long base = 1234567;
+{
+  static unsigned long base = 1234567;
 
- base = base*5 + 1;
- seed = base + offset + reverse(time((long*)0));
- return(seed);
- }
+  base = base * 5 + 1;
+  seed = base + offset + reverse(time((long *)0));
+  return (seed);
+}
 
 /*----------------------------------------------------------------------------*
 SAVE AND RESTORE RANDOM NUMBER SEEDS
@@ -207,19 +207,26 @@ static char rnd[] = "nextseed.rnd";
 static char *file = rnd;
 
 int RandStartNext(char *s)
- {
- unsigned long randseed; FILE *pf;
+{
+  unsigned long randseed;
+  FILE *pf;
 
- if(s) file = s;                              //Retrieve any passed file name.
+  if (s)
+    file = s; //Retrieve any passed file name.
 
- pf = fopen(file, "r");                       //If no previous seed exists,
+  pf = fopen(file, "r"); //If no previous seed exists,
 
- if(pf==0)                                    //start with an arbitrary one.
- { RandStartArb(0); return(0); }
+  if (pf == 0) //start with an arbitrary one.
+  {
+    RandStartArb(0);
+    return (0);
+  }
 
- fscanf(pf, "%lu", &randseed); fclose(pf);    //Otherwise resume the sequence
- RandStart(randseed); return(1);              //where it left off.
- }
+  fscanf(pf, "%lu", &randseed);
+  fclose(pf); //Otherwise resume the sequence
+  RandStart(randseed);
+  return (1); //where it left off.
+}
 
 /*
 SAVE ENDING SEED
@@ -234,18 +241,22 @@ EXIT:  The ending seed has been saved.
 */
 
 RandStopNext(char *s)
- {
- unsigned long randseed, RandEndingSeed(); FILE *pf;
+{
+  unsigned long randseed, RandEndingSeed();
+  FILE *pf;
 
- if(s) file = s;                              //Retrieve any passed file name.
+  if (s)
+    file = s; //Retrieve any passed file name.
 
- unlink(file);                                //Delete any existing file.
+  unlink(file); //Delete any existing file.
 
- pf = fopen(file, "w");                       //Record the seed for the next
- if(pf)                                       //time the program runs.
- { fprintf(pf, "%lu\n", RandEndingSeed());
-   fclose(pf); }
- }
+  pf = fopen(file, "w"); //Record the seed for the next
+  if (pf)                //time the program runs.
+  {
+    fprintf(pf, "%lu\n", RandEndingSeed());
+    fclose(pf);
+  }
+}
 
 /*----------------------------------------------------------------------------*
 GENERATE INTEGER SEQUENCE
@@ -291,13 +302,13 @@ EXIT:  'RandInteger' returns a new random number.
 #define OVERSIZE
 
 unsigned long RandInteger()
- {
+{
 #ifdef OVERSIZE
- return( seed = (seed*19513957 + 907633385) & 0xffffffff);
+  return (seed = (seed * 19513957 + 907633385) & 0xffffffff);
 #else
- return(seed = seed*19513957 + 907633385);
+  return (seed = seed * 19513957 + 907633385);
 #endif
- }
+}
 
 /*----------------------------------------------------------------------------*
 RETURN ENDING RANDOM NUMBER SEED
@@ -313,9 +324,9 @@ EXIT:  'RandEndingSeed' contains the random number seed, which can be used
 */
 
 unsigned long RandEndingSeed()
- {
- return(seed);
- }
+{
+  return (seed);
+}
 
 /*----------------------------------------------------------------------------*
 REVERSE ORDER OF BITS
@@ -332,13 +343,17 @@ EXIT:  'reverse' contains the value on entry with the low 32 bits in the
 */
 
 static unsigned long reverse(unsigned long k)
- {
- int n; unsigned long h;
+{
+  int n;
+  unsigned long h;
 
- for (h=n=0; n<32; n++)  { h = (h<<1) + (k&1); k >>= 1; }
- return(h);
- }
-
+  for (h = n = 0; n < 32; n++)
+  {
+    h = (h << 1) + (k & 1);
+    k >>= 1;
+  }
+  return (h);
+}
 
 /* CLARENCE LEHMAN, JULY 1972 [Originally on the IBM System 360].
 
@@ -358,4 +373,3 @@ Modifications
  8. Converted to ANSI C, January 2010 [CLL].
  9. Multiple arbitrary starting seeds, April 2011 [CLL].
 */
-

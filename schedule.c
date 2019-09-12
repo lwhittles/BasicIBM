@@ -114,7 +114,6 @@ In this module the three functions that correspond to the above are
 described above.
 */
 
-
 /*----------------------------------------------------------------------------*
 DATA STRUCTURES
 
@@ -146,29 +145,31 @@ by event times, for speed of dispatching.
 
 #include "common.h"
 
-#define PINIT  if(run1==0) EventInit();
+#define PINIT    \
+  if (run1 == 0) \
+    EventInit();
 
-#define PEMPTY -1      //Marker for bins containing no linkages.
-#define TN (INDIV+0)   //Maximum number of time bins.
-#define PN (INDIV+NPSEUDO)   //Maximum number of time bin forward indexes.
-#define TW  20         //Time width of all bins combined (for optimization).
+#define PEMPTY -1            //Marker for bins containing no linkages.
+#define TN (INDIV + 0)       //Maximum number of time bins.
+#define PN (INDIV + NPSEUDO) //Maximum number of time bin forward indexes.
+#define TW 20                //Time width of all bins combined (for optimization).
 
-dec t;                 //Current time, last dispatched event.
+dec t; //Current time, last dispatched event.
 
-static int run1;       //Flag to detect if the routine is being reused.
+static int run1; //Flag to detect if the routine is being reused.
 
-static dec T[PN];      //Time for each scheduled event.
-static int P[PN];      //Forward indexes within bins, ending with zero.
-static int Q[TN];      //First index for the bin, with zero for empty bins.
+static dec T[PN]; //Time for each scheduled event.
+static int P[PN]; //Forward indexes within bins, ending with zero.
+static int Q[TN]; //First index for the bin, with zero for empty bins.
 
-static int Qn  = TN;   //Number of elements in 'Q'.
-static dec Qw  = TW;   //Interval of time represented for each cycle in 'Q'.
-static int Qi  = 0;    //Index of the immediate time bin.
-static int Qo  = 1;    //Flag set if the immediate bin is in order.
-static int Qe  = 0;    //Number of events in all bins.
+static int Qn = TN; //Number of elements in 'Q'.
+static dec Qw = TW; //Interval of time represented for each cycle in 'Q'.
+static int Qi = 0;  //Index of the immediate time bin.
+static int Qo = 1;  //Flag set if the immediate bin is in order.
+static int Qe = 0;  //Number of events in all bins.
 
-static dec Qt0 = 0;    //Earliest time representable this cycle in 'Q'.
-static dec Qt1 = TW;   //Earliest time beyond this cycle in 'Q'.
+static dec Qt0 = 0;  //Earliest time representable this cycle in 'Q'.
+static dec Qt1 = TW; //Earliest time beyond this cycle in 'Q'.
 
 /*----------------------------------------------------------------------------*
 INITIALIZE STATIC DATA STRUCTURES
@@ -184,21 +185,32 @@ EXIT:  Any prior data have been wiped clean.
 */
 
 EventInit()
-{ int i;
+{
+  int i;
 
-  for(i=0; i<PN; i++) P[i] = PEMPTY;
-  if(run1==0) { run1 = 1; return 0; } //Tendai changed return to return 0; to avoid warnings
+  for (i = 0; i < PN; i++)
+    P[i] = PEMPTY;
+  if (run1 == 0)
+  {
+    run1 = 1;
+    return 0;
+  } //Tendai changed return to return 0; to avoid warnings
 
-  for(i=0; i<PN; i++) T[i] = 0;
-  for(i=0; i<TN; i++) Q[i] = 0;
+  for (i = 0; i < PN; i++)
+    T[i] = 0;
+  for (i = 0; i < TN; i++)
+    Q[i] = 0;
 
-  Qn  = TN; Qw  = TW; Qi  = 0;
-  Qo  = 1;  Qe  = 0;
-  Qt0 = 0;  Qt1 = TW;
+  Qn = TN;
+  Qw = TW;
+  Qi = 0;
+  Qo = 1;
+  Qe = 0;
+  Qt0 = 0;
+  Qt1 = TW;
 
   t = 0;
 }
-
 
 /*----------------------------------------------------------------------------*
 SET STARTING TIME
@@ -216,14 +228,16 @@ EXIT:  't' is set to the 't0'.
 */
 
 EventStartTime(dec t0)
-{ PINIT;                                     //Initialize if necessary.
+{
+  PINIT; //Initialize if necessary.
 
-  if(Qe) Error(742.);                        //Make sure the bins are empty.
+  if (Qe)
+    Error(742.); //Make sure the bins are empty.
 
-  Qt0 = t0-(Qw/Qn)/2;                        //Set the time boundaries, leaving
-  Qt1 = Qt0+Qw;                              //room for rounding errors.
+  Qt0 = t0 - (Qw / Qn) / 2; //Set the time boundaries, leaving
+  Qt1 = Qt0 + Qw;           //room for rounding errors.
 
-  t = t0;                                    //Set the global time.
+  t = t0; //Set the global time.
 }
 
 /*
@@ -235,7 +249,6 @@ equivalent in some other radix. Then the event would not be slotted in the
 first bin, but rather in the last, and would not come out of the list in
 proper order. Positioning it in the middle prevents that.
 */
-
 
 /*----------------------------------------------------------------------------*
 SCHEDULE NEW EVENT
@@ -252,25 +265,40 @@ WORK:  The scheduling data structures are prepared as described above.
 */
 
 EventSchedule(int n, dec te)
-{ int i; dec tr;
+{
+  int i;
+  dec tr;
 
-  PINIT;                                     //Initialize if necessary.
- 
-  if(n<1||n>=PN)   {printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d,route=%d\n",t,A[n].InFunction,A[n].pending,n,A[n].state,A[n].id);   Error1(734.1, "n=",n);}    //Check the index and make sure an
-  if(P[n]!=PEMPTY) {printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d,route=%d\n",t,A[n].InFunction,A[n].pending,n,A[n].state,A[n].id);   Error1(735.1, "n=",n);}    //event is not already scheduled
-  if(te<t) {printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n",t,A[n].InFunction,A[n].pending,n,A[n].state,A[n].id);   
-Error2(737., "t=",t, ">",te); }  //and is not in the past.
+  PINIT; //Initialize if necessary.
 
-  T[n] = te;                                 //Record the time of the new event.
+  if (n < 1 || n >= PN)
+  {
+    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n", t, A[n].InFunction, A[n].pending, n, A[n].state, A[n].id);
+    Error1(734.1, "n=", n);
+  } //Check the index and make sure an
+  if (P[n] != PEMPTY)
+  {
+    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n", t, A[n].InFunction, A[n].pending, n, A[n].state, A[n].id);
+    Error1(735.1, "n=", n);
+  } //event is not already scheduled
+  if (te < t)
+  {
+    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n", t, A[n].InFunction, A[n].pending, n, A[n].state, A[n].id);
+    Error2(737., "t=", t, ">", te);
+  } //and is not in the past.
 
-  tr = (te-Qt0)/Qw; tr -= (int)tr;           //Convert the time to a bin number
-  i  = tr*Qn; if(i==Qi) Qo = 0;              //and mark for sorting if needed.
+  T[n] = te; //Record the time of the new event.
 
-  P[n] = Q[i]; Q[i] = n;                     //Add the event to the list for
-  Qe += 1;                                   //that bin and increment the number
-}                                            //of events.
+  tr = (te - Qt0) / Qw;
+  tr -= (int)tr; //Convert the time to a bin number
+  i = tr * Qn;
+  if (i == Qi)
+    Qo = 0; //and mark for sorting if needed.
 
-
+  P[n] = Q[i];
+  Q[i] = n; //Add the event to the list for
+  Qe += 1;  //that bin and increment the number
+} //of events.
 
 /*----------------------------------------------------------------------------*
 
@@ -285,40 +313,58 @@ WORK:  The scheduling data structures are prepared as described above.
 */
 
 EventCancel(int n)
-{ int i, j, jp; dec tr;
+{
+  int i, j, jp;
+  dec tr;
 
-  PINIT;                                     //Initialize if necessary.
-  if(n<1||n>=PN)   {printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d,route=%d\n",t,A[n].InFunction,A[n].pending,n,A[n].state,A[n].id);   
-    Error1(734.2, "n=",n); }   //Check the index and make sure an
-  if(P[n]==PEMPTY) {    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n",t,A[n].InFunction,A[n].pending,n,A[n].state,A[n].id);   
-    Error1(736.2, "n=",n); } //event is scheduled.
+  PINIT; //Initialize if necessary.
+  if (n < 1 || n >= PN)
+  {
+    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n", t, A[n].InFunction, A[n].pending, n, A[n].state, A[n].id);
+    Error1(734.2, "n=", n);
+  } //Check the index and make sure an
+  if (P[n] == PEMPTY)
+  {
+    printf("t=%f,fnc=%d, pending=%d, n=%d, state=%d,id=%d\n", t, A[n].InFunction, A[n].pending, n, A[n].state, A[n].id);
+    Error1(736.2, "n=", n);
+  } //event is scheduled.
 
-  tr = (T[n]-Qt0)/Qw; tr -= (int)tr;         //Convert the time to a bin number,
-  i  = tr*Qn;                                //modulo the duration of the cycle.
+  tr = (T[n] - Qt0) / Qw;
+  tr -= (int)tr; //Convert the time to a bin number,
+  i = tr * Qn;   //modulo the duration of the cycle.
 
-  if(cancel1(n, i)) return 0;  //Tendai changed return to return 0; to avoid warnings
-                  //Remove it from its normal bin.
+  if (cancel1(n, i))
+    return 0; //Tendai changed return to return 0; to avoid warnings
+              //Remove it from its normal bin.
 
-  i = (i-1+Qn) % Qn;                         //If it is not there, check the
-  if(cancel1(n, i)) return 0;  //Tendai changed return to return 0; to avoid warnings                  //bin below (from rounding error).
+  i = (i - 1 + Qn) % Qn; //If it is not there, check the
+  if (cancel1(n, i))
+    return 0; //Tendai changed return to return 0; to avoid warnings                  //bin below (from rounding error).
 
-  i = (i+2+Qn) % Qn;                         //Finally, check the bin above.
-  if(cancel1(n, i)) return 0;  //Tendai changed return to return 0; to avoid warnings
+  i = (i + 2 + Qn) % Qn; //Finally, check the bin above.
+  if (cancel1(n, i))
+    return 0; //Tendai changed return to return 0; to avoid warnings
 
-  Error1(818., "n=",n);                      //If the specified event was not in
-}                                            //the list, signal an error.
+  Error1(818., "n=", n); //If the specified event was not in
+} //the list, signal an error.
 
 int cancel1(int n, int i)
-{ int j, jp;
+{
+  int j, jp;
 
-  for(jp=0,j=Q[i]; j>0; jp=j,j=P[j])         //Scan the list of pending events
-    if(j==n)                                 //in this bin and remove the
-    { if(jp>0) P[jp] = P[j];                 //specified event. (The average
-      else     Q[i]  = P[j];                 //number events in a non-empty bin
-      P[j] = PEMPTY;                         //is 1.5)
-      Qe -= 1; if(Qe<0)
-        Error2(819., "n=",n, " bin=",i);
-      return 1; }
+  for (jp = 0, j = Q[i]; j > 0; jp = j, j = P[j]) //Scan the list of pending events
+    if (j == n)                                   //in this bin and remove the
+    {
+      if (jp > 0)
+        P[jp] = P[j]; //specified event. (The average
+      else
+        Q[i] = P[j]; //number events in a non-empty bin
+      P[j] = PEMPTY; //is 1.5)
+      Qe -= 1;
+      if (Qe < 0)
+        Error2(819., "n=", n, " bin=", i);
+      return 1;
+    }
   return 0;
 }
 
@@ -332,7 +378,6 @@ an adjacent bin. In simulations testing this condition, it happened only once
 per ten million times or less, so there is no speed issue here, only a
 correctness issue.
 */
-
 
 /*----------------------------------------------------------------------------*
 RENUMBER EXISTING EVENT
@@ -351,13 +396,18 @@ EXIT:  'n' is the new index number of the individual.
 */
 
 EventRenumber(int n, int m)
-{  if(n<1||n>=PN) Error1(734.3, "n=",n);      //Check the indexes and make sure
-  if(m<1||m>=PN) Error1(734.4, "n=",m);      //they are in range.
+{
+  if (n < 1 || n >= PN)
+    Error1(734.3, "n=", n); //Check the indexes and make sure
+  if (m < 1 || m >= PN)
+    Error1(734.4, "n=", m); //they are in range.
 
-  if(n!=m)
-  { T[n] = T[m];                             //Transfer the time.
-    EventCancel(m);                          //Cancel the old number.
-    EventSchedule(n, T[n]); }                //Reschedule as the new number.
+  if (n != m)
+  {
+    T[n] = T[m];    //Transfer the time.
+    EventCancel(m); //Cancel the old number.
+    EventSchedule(n, T[n]);
+  } //Reschedule as the new number.
 }
 
 /*----------------------------------------------------------------------------*
@@ -374,26 +424,43 @@ WORK:  The scheduling data structures are prepared as described above.
 */
 
 int EventNext()
-{ int j, n;
+{
+  int j, n;
 
-  PINIT;                                     //Initialize if necessary.
+  PINIT; //Initialize if necessary.
 
-  while(Qe>0)
-  { for(; Qi<Qn; Qo=0,Qi++)                  //Advance to the next non-empty
-    { j = Q[Qi]; if(j==0) continue;          //bin.
+  while (Qe > 0)
+  {
+    for (; Qi < Qn; Qo = 0, Qi++) //Advance to the next non-empty
+    {
+      j = Q[Qi];
+      if (j == 0)
+        continue; //bin.
 
-      if(Qo==0)                              //Sort the bin if it may be
-      { j = Q[Qi] = sort(P,j,0); Qo = 1; }   //necessary.
+      if (Qo == 0) //Sort the bin if it may be
+      {
+        j = Q[Qi] = sort(P, j, 0);
+        Qo = 1;
+      } //necessary.
 
-      if(T[j]<Qt1)                           //If the event belongs to this
-      { if(P[j]==PEMPTY) Error(820.1);       //pass, remove it from the list,
-        Q[Qi] = P[j];                        //decrement the number of events,
-        P[j] = PEMPTY; Qe -= 1;              //advance the global time, and
-        t = T[j]; return j; } }              //return the event's index.
+      if (T[j] < Qt1) //If the event belongs to this
+      {
+        if (P[j] == PEMPTY)
+          Error(820.1); //pass, remove it from the list,
+        Q[Qi] = P[j];   //decrement the number of events,
+        P[j] = PEMPTY;
+        Qe -= 1; //advance the global time, and
+        t = T[j];
+        return j;
+      }
+    } //return the event's index.
 
-    Qi = 0; Qt0 += Qw; Qt1 = Qt0+Qw; }       //Circle back to the first bin.
+    Qi = 0;
+    Qt0 += Qw;
+    Qt1 = Qt0 + Qw;
+  } //Circle back to the first bin.
 
-  return 0;                                  //Signal completion of all events.
+  return 0; //Signal completion of all events.
 }
 
 /*
@@ -404,7 +471,6 @@ only a few. Suppose a million individuals ended up in one bin, say due to some
 common start-up condition. Sorting is $n\log n$, exhaustively searching would be
 $n^2/2$, and the latter would be prohibitive.
 */
-
 
 /*----------------------------------------------------------------------------*
 DISPLAY PROFILE
@@ -424,41 +490,51 @@ EXIT;  'EventProfile' contains the amount of memory allocated for the main data
 #define PROF 1001
 
 int EventProfile(char *label)
-{ int i, j, n, imax, prof[PROF];
+{
+  int i, j, n, imax, prof[PROF];
   dec nexp, lambda, eml, ln, nf;
 
-  if(label==0||label[0]==0) label = "Bin";   //Establish a default label.
+  if (label == 0 || label[0] == 0)
+    label = "Bin"; //Establish a default label.
 
-  for(i=0; i<PROF; i++) prof[i] = 0;         //Clear the profile array.
+  for (i = 0; i < PROF; i++)
+    prof[i] = 0; //Clear the profile array.
 
-  for(i=0; i<Qn; i++)                        //Count the number of bins that
-  { for(j=Q[i],n=0; j>0; j=P[j],n++)         //have no entries, one entry, two
-      if(j<1||j>=PN||n>PN)                   //entries, etc.
-        Error1(820.2, "j=",j);
-    if(n>PROF-1) n = PROF-1;
-    prof[n] += 1; }
+  for (i = 0; i < Qn; i++) //Count the number of bins that
+  {
+    for (j = Q[i], n = 0; j > 0; j = P[j], n++) //have no entries, one entry, two
+      if (j < 1 || j >= PN || n > PN)           //entries, etc.
+        Error1(820.2, "j=", j);
+    if (n > PROF - 1)
+      n = PROF - 1;
+    prof[n] += 1;
+  }
 
-  for(i=imax=0; i<PROF; i++)                 //Determine the greatest number
-    if(prof[i]) imax = i;                    //in any bin.
+  for (i = imax = 0; i < PROF; i++) //Determine the greatest number
+    if (prof[i])
+      imax = i; //in any bin.
 
-  lambda = (dec)Qe/Qn;                       //Compute the parameters for the
-  eml = exp(-lambda); ln = nf = 1;           //Poisson distribution.
+  lambda = (dec)Qe / Qn; //Compute the parameters for the
+  eml = exp(-lambda);
+  ln = nf = 1; //Poisson distribution.
 
-  printf("%s distribution of %d events:\n",  //Display heading lines.
-    label, Qe);
+  printf("%s distribution of %d events:\n", //Display heading lines.
+         label, Qe);
   printf("   N   Observed   Expected\n");
 
-  for(i=0; i<=imax; i++)                     //Display the distribution of bin
-  { nexp = Qn*eml*ln/nf;                     //sizes, compared with the complete
-    if(prof[i] || nexp>0.5)                  //randomness of the Poisson.
+  for (i = 0; i <= imax; i++) //Display the distribution of bin
+  {
+    nexp = Qn * eml * ln / nf; //sizes, compared with the complete
+    if (prof[i] || nexp > 0.5) //randomness of the Poisson.
       printf("%4d%c%9d %10.0f\n",
-        i, i<PROF-1?' ':'+', prof[i], nexp);
-    ln *= lambda; nf *= i+1; }
+             i, i < PROF - 1 ? ' ' : '+', prof[i], nexp);
+    ln *= lambda;
+    nf *= i + 1;
+  }
 
-  printf("\n");                              //Leave a blank line and return
-  return sizeof Q + sizeof T + sizeof P;     //with the size of the main data
-}                                            //structure.
-
+  printf("\n");                          //Leave a blank line and return
+  return sizeof Q + sizeof T + sizeof P; //with the size of the main data
+} //structure.
 
 /*----------------------------------------------------------------------------*
 DETERMINE SORTING ORDER
@@ -475,9 +551,11 @@ EXIT:  'order' contains a status code.
 */
 
 int order(int p, int q)
-{ dec w;
+{
+  dec w;
 
-  w = T[p]-T[q]; return w<0? -1: w>0? 1: 0;
+  w = T[p] - T[q];
+  return w < 0 ? -1 : w > 0 ? 1 : 0;
 }
 
 /* (C) CLARENCE LEHMAN, UNIVERSITY OF MINNESOTA, AUGUST 2009.
@@ -496,4 +574,3 @@ Modifications
 
 4. 'EventInit' added for serial reusability, May 2011 [CLL].
 */
-

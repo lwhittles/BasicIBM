@@ -11,79 +11,92 @@ the fitting routine.
 
 */
 
-
-int mainfx ( int argc, char *argv[] )
+int mainfx(int argc, char *argv[])
 
 /******************************************************************************/
-{ int i, j, k, l, n, sid;
+{
+  int i, j, k, l, n, sid;
 
-  startsec = time(NULL);                     //Retrieve the wall-clock time. time() in time.h?
+  startsec = time(NULL); //Retrieve the wall-clock time. time() in time.h?
 
-  if(fit5i==0) ErrorInit();                  //Trap system failures. In Error.c
-  MainInit();                                //Start the main program. In Declarations.c
-  EventInit();                               //Start the event queue.
+  if (fit5i == 0)
+    ErrorInit(); //Trap system failures. In Error.c
+  MainInit();    //Start the main program. In Declarations.c
+  EventInit();   //Start the event queue.
   //FinalInit();                               //Start the final reports.
-  ReportInit();                              //Start the output reports.
+  ReportInit(); //Start the output reports.
 
-  A = (struct Indiv *)                       //Allocate array of individuals. struct Indiv defined in common.h
-    calloc(indiv+NPSEUDO, sizeof(struct Indiv)+nEngines); //(Not static because of gcc bug
-  if(A==0) Error(911.);                      //restricting such arrays to 2GB.)
+  A = (struct Indiv *)                                          //Allocate array of individuals. struct Indiv defined in common.h
+      calloc(indiv + NPSEUDO, sizeof(struct Indiv) + nEngines); //(Not static because of gcc bug
+  if (A == 0)
+    Error(911.); //restricting such arrays to 2GB.)
 
-  if(SUPER) maximm = 10000000;              //Adjust 'maximm' depending on
-  else      maximm =  indiv-1;              //whether running on supercomp.
-                                            //Adjusted by Tendai. NB maximm<<indiv in common.h .Changed to indiv-1 on 05/03/15
+  if (SUPER)
+    maximm = 10000000; //Adjust 'maximm' depending on
+  else
+    maximm = indiv - 1; //whether running on supercomp.
+                        //Adjusted by Tendai. NB maximm<<indiv in common.h .Changed to indiv-1 on 05/03/15
 
-  Data();                                    //Read in appropriate data files
-                                             //and store to arrays.
-  my_id_0=(dec) my_id;
-  gparam(argc, argv);                        //Collect parameters for this run
-                                             //which have been specified on
-                                             //command line.
+  Data(); //Read in appropriate data files
+          //and store to arrays.
+  my_id_0 = (dec)my_id;
+  gparam(argc, argv); //Collect parameters for this run
+                      //which have been specified on
+                      //command line.
 
-  Param();                                   //Update variables/distributions
-                                             //affected by parameters which
-                                             //can change with each model run.
+  Param(); //Update variables/distributions
+           //affected by parameters which
+           //can change with each model run.
   //Births
-  if(bcy[0]<=0.0001)                         //Calculate years per birth and
-  { ypb = RT*100;                            //per immigrant at t=t0 for
-    }//printf("Births are zero!\n"); }          //scheduling them regularly. If
-  else ypb = 1./RT*100;//bcy[0];                      //births (immigrants) per year
-                                             //Update time of last update for
-  lup = t0;                                  //parameters sensitive to
-                                             //calendar year.
+  if (bcy[0] <= 0.0001) //Calculate years per birth and
+  {
+    ypb = RT * 100; //per immigrant at t=t0 for
+  }                 //printf("Births are zero!\n"); }          //scheduling them regularly. If
+  else
+    ypb = 1. / RT * 100; //bcy[0];                      //births (immigrants) per year
+                         //Update time of last update for
+  lup = t0;              //parameters sensitive to
+                         //calendar year.
 
   //randseq=(int) my_id_0+(int)currentrun*(int)numprocs;
-  printf ( "\n" );
-  printf ( "  The randseed is %d.\n", (int)randseq );
-  rand0 = abs((int)randseq);                      //Start the random number sequence
-  if(randseq>=0)  RandStart(rand0);          //from a specified or an arbitrary
-  else rand0 = RandStartArb(rand0);          //place.
+  printf("\n");
+  printf("  The randseed is %d.\n", (int)randseq);
+  rand0 = abs((int)randseq); //Start the random number sequence
+  if (randseq >= 0)
+    RandStart(rand0); //from a specified or an arbitrary
+  else
+    rand0 = RandStartArb(rand0); //place.
 
-  EventStartTime(t0);                        //Initialize the event queues.
+  EventStartTime(t0); //Initialize the event queues.
 
-  t = t0;                                    //Set the starting time
+  t = t0; //Set the starting time
 
-  fpds=fopen(ftimesname, "w");
+  fpds = fopen(ftimesname, "w");
 
-  InitPop();                                 //Set up initial population.
-  BindInit();                                //Initilize Binding.
+  InitPop();  //Set up initial population.
+  BindInit(); //Initilize Binding.
 
-  snprintf(fname, sizeof(fname), "%s_%d%d.txt", fnamestem, (int)fnumber,(int)randseq);
-  printf ( "\n" );
-  printf ( "  The name is %d.\n", (int)fnumber );
-  fptr=fopen(fname, "w");
-  Report(argv[0]); pt = t;                   //Report initial conditions.
+  snprintf(fname, sizeof(fname), "%s_%d%d.txt", fnamestem, (int)fnumber, (int)randseq);
+  printf("\n");
+  printf("  The name is %d.\n", (int)fnumber);
+  fptr = fopen(fname, "w");
+  Report(argv[0]);
+  pt = t; //Report initial conditions.
 
-  BirthG();                                  //Start external event generators
-  for(t=t0; t<t1; Dispatch())                //Main loop: process events,
-    { if(t-pt<tgap) continue;                //reporting results periodically.
-    pt = t; Report(argv[0]); }
+  BirthG();                        //Start external event generators
+  for (t = t0; t < t1; Dispatch()) //Main loop: process events,
+  {
+    if (t - pt < tgap)
+      continue; //reporting results periodically.
+    pt = t;
+    Report(argv[0]);
+  }
 
-  Report(argv[0]);                           //Get final report.
+  Report(argv[0]); //Get final report.
   fclose(fptr);
   fclose(fpds);
 
-  free(A);                                   //caller.
+  free(A); //caller.
 
   return 0;
 }
@@ -108,19 +121,38 @@ EXIT:  The next event has been processed and 'events' incremented, if the
 */
 
 Dispatch()
-{ int n; dec tw;
+{
+  int n;
+  dec tw;
 
-  tw = t;                                    //Remember the previous time.
-  n = EventNext(); if(t>t1) return 0;          //Advance time to the next event. //Tendai changed return to return 0; to avoid warnings
-  tstep(tw, t);                              //Record the size of the time step.
-  events += 1;                               //Increment the events counter.
-  switch(A[n].pending){                      //Process the event.
-  case pDeath:    Death(n);        break;    //[death]
-  case pProgress: Progress(n);     break;
-  case pBirth:    BirthG();        break;    //[birth generator]
-  default: Error2(921.2,                      //[system error]
-		  "`A[",n,"].pending=",A[n].pending);
-  }}
+  tw = t; //Remember the previous time.
+  n = EventNext();
+  if (t > t1)
+    return 0;   //Advance time to the next event. //Tendai changed return to return 0; to avoid warnings
+  tstep(tw, t); //Record the size of the time step.
+  events += 1;  //Increment the events counter.
+  switch (A[n].pending)
+  { //Process the event.
+  case pDeath:
+    Death(n);
+    break; //[death]
+  case pProgress:
+    Progress(n);
+    break;
+  case pRegress:
+    Regress(n);
+    break;
+  case pDeathTB:
+    DeathTB(n);
+    break;
+  case pBirth:
+    BirthG();
+    break; //[birth generator]
+  default:
+    Error2(921.2, //[system error]
+           "`A[", n, "].pending=", A[n].pending);
+  }
+}
 
 /*----------------------------------------------------------------------------*
 BIRTH GENERATOR
@@ -138,24 +170,24 @@ ENTRY: 't' contains the current time.
 EXIT:  A new individual has been born and added to the UK group.
        The next birth has been scheduled.
 */
-struct Clock Cbirth ;                    //Create a new clock structure
+struct Clock Cbirth; //Create a new clock structure
 BirthG()
-{ int yr,n;
-  yr=(int)(t-t0);
-  n=CCadd(UK);
-  Birth(n,t);                     //Create someone born in the UK.
-  Cbirth.type=4;                          //Assign clock type
-  Cbirth.rate=1/ypb;                      //Assign birth rate
+{
+  int yr, n;
+  yr = (int)(t - t0);
+  n = CCadd(UK);
+  Birth(n, t);           //Create someone born in the UK.
+  Cbirth.type = 4;       //Assign clock type
+  Cbirth.rate = 1 / ypb; //Assign birth rate
   //Cbirth.rate=1/ypb_fixed;           //if rate is fixed
   //Cbirth.rate=bcy[yr];  		//if rate in based on data sotred in array bcy
 
-  Cbirth.rel=1;                         //Assign relative width of a random
-                                          //interval during which the next
-                                          //birth is allowed to happen.
-  Cbirth = ClockTick(Cbirth);             //call clock ticker
-  A[BIRTH].pending = pBirth;              //Schedule the next birth.
-  EventSchedule(BIRTH,Cbirth.next);
-
+  Cbirth.rel = 1;             //Assign relative width of a random
+                              //interval during which the next
+                              //birth is allowed to happen.
+  Cbirth = ClockTick(Cbirth); //call clock ticker
+  A[BIRTH].pending = pBirth;  //Schedule the next birth.
+  EventSchedule(BIRTH, Cbirth.next);
 }
 
 /*----------------------------------------------------------------------------*
@@ -185,28 +217,30 @@ EXIT:  'Birth' contains a status code.
 */
 
 int Birth(int n, dec b)
-{ int y, s, v, e,rob, st; dec wd, wh,we,age;
-  A[n].InFunction=fnc_Birth;
+{
+  int y, s, v, e, rob, st;
+  dec wd, wh, we, age;
+  A[n].InFunction = fnc_Birth;
 
-  y = (int)t - (int)t0;                        //Retrieve year index for arrays.
-  if(n<Clowest[UK]) Error1(610.1, "n=",(dec)n);//Check for appropriate 'n', this
-  if(n>indiv)    Error1(610.2, "n=",(dec)n); //routine does not allow immigrant
-                                             //births or births to those with
-                                             //index number >'indiv'.
-  nbirths +=1;
+  y = (int)t - (int)t0; //Retrieve year index for arrays.
+  if (n < Clowest[UK])
+    Error1(610.1, "n=", (dec)n); //Check for appropriate 'n', this
+  if (n > indiv)
+    Error1(610.2, "n=", (dec)n); //routine does not allow immigrant
+                                 //births or births to those with
+                                 //index number >'indiv'.
+  nbirths += 1;
   //A[n].sex = Rand()<pmale[y]? 0: 1;          //Assign the newborn's sex from data array.
-  A[n].sex = Rand()<0.5? 0: 1;          //Assign the newborn's sex from random number generation.
+  A[n].sex = Rand() < 0.5 ? 0 : 1; //Assign the newborn's sex from random number generation.
   s = A[n].sex;
-  age=0.;                                 //sent age
-  rob=UK;				  //assign country of birth
-  st = Rand()<0.00078? 1: 0;      //Assign infection status from random number generation.
+  age = 0.;                      //sent age
+  rob = UK;                      //assign country of birth
+  st = Rand() < 0.00078 ? 1 : 0; //Assign infection status from random number generation.
 
-  BasicInd(y,n,UK,age,s,UK, st);                  //Set up basic individual.
+  BasicInd(y, n, UK, age, s, UK, st); //Set up basic individual.
   EventCancel(n);
-  Check_all_events(n);                       //Update schedule for all events
-
+  Check_all_events(n); //Update schedule for all events
 }
-
 
 /*----------------------------------------------------------------------------*
 DEATH
@@ -229,48 +263,59 @@ EXIT:  Either entry 'n' is sent to the Birth() function, to be initialized as a
        Counters in 'N',popsize are updated.
 */
 
-#define DTYPE 0                              //Allows for non-constant population
-                                             //size.
+#define DTYPE 0 //Allows for non-constant population \
+                //size.
 Death(int n)
-{ int n2,yr,gid,tr,st,q,qv; dec age;
-     A[n].InFunction=fnc_Death;
-	st=A[n].strain;
-  	yr=(int)(t-t0);                      //current year
-	age = t-A[n].tBirth;                       //Compute the age at death.
-        gid = A[n].groupID;                  // individual's current group ID
-        q = A[n].state;                      // individual's current infection state
+{
+  int n2, yr, gid, tr, st, q, qv;
+  dec age;
+  A[n].InFunction = fnc_Death;
+  st = A[n].strain;
+  yr = (int)(t - t0);    //current year
+  age = t - A[n].tBirth; //Compute the age at death.
+  gid = A[n].groupID;    // individual's current group ID
+  q = A[n].state;        // individual's current infection state
 
-  	{ age1[0] += age; age2[0] += age*age;//Accumulate statistics for mean
-    	agec[0] += 1; }                      //age and its variance.
+  {
+    age1[0] += age;
+    age2[0] += age * age; //Accumulate statistics for mean
+    agec[0] += 1;
+  } //age and its variance.
 
-	N[gid] -=1;                    //Decrement N[A[n].groupID][A[n].state].
-	popsize-=1;	                     //updte population size
-	deaths += 1;                         //Increment the number of deaths.
-  if(q == qUTB) {
-    uninfecteds -=1;
-    UTB[gid] -=1;
-  } else if(q==qLTB) {
-    latents -=1;
-    LTB[gid] -=1;
-  } else if(q==qATB) {
-    actives -=1;
-    ATB[gid] -=1;
+  N[gid] -= 1;  //Decrement N[A[n].groupID][A[n].state].
+  popsize -= 1; //updte population size
+  deaths += 1;  //Increment the number of deaths.
+  if (q == qUTB)
+  {
+    uninfecteds -= 1;
+    UTB[gid] -= 1;
+  }
+  else if (q == qLTB)
+  {
+    latents -= 1;
+    LTB[gid] -= 1;
+  }
+  else if (q == qATB)
+  {
+    actives -= 1;
+    ATB[gid] -= 1;
   }
 
-        BindDelete(A[n].bfrom);              //remove contact links
-        BindDelete(A[n].bto);                //remove contact links
-        DetachH(n);                          //Remove from the database.
-        CCdel(gid,n);                        //remove individual
-        if(DTYPE==0)                         //If population size is to be held
-        { n=CCadd(UK);
-        Birth(n, t);                         //constant, initiate a birth.
-        return 0; }
+  BindDelete(A[n].bfrom); //remove contact links
+  BindDelete(A[n].bto);   //remove contact links
+  DetachH(n);             //Remove from the database.
+  CCdel(gid, n);          //remove individual
+  if (DTYPE == 0)         //If population size is to be held
+  {
+    n = CCadd(UK);
+    Birth(n, t); //constant, initiate a birth.
+    return 0;
+  }
 
   return 1;
 }
 
-
-/*----------------------------------------------------------------------------*
+/*----------------------------------------------------------------------------
 PROGRESSION
 
 This routine is dispatched when an individual progresses from latent to active disease.
@@ -286,35 +331,104 @@ EXIT:
 
 */
 Progress(int n)
-{ int n2,yr,gid,tr,st,q,qv,s; dec age, mort,wd, te;
-     A[n].InFunction=fnc_Progress;
-	     st=A[n].strain;
+{
+  int n2, yr, gid, tr, st, q, qv, s;
+  dec age, mort, wd, rreg, wr;
+  A[n].tProgress = 0;
+  A[n].InFunction = fnc_Progress;
+  st = A[n].strain;
 
-        gid = A[n].groupID;                  // individual's current group ID
-        A[n].state = qATB;                  // update current infection state
-        	age = t-A[n].tBirth;               //Compute the age at progression.
-          s = A[n].sex;
-          mort = 0.1;
+  gid = A[n].groupID;    // individual's current group ID
+  A[n].state = qATB;     // update current infection state
+  age = t - A[n].tBirth; //Compute the age at progression.
+  s = A[n].sex;
+  mort = 0.1; // annual rate of death from disease
+  rreg = 0.2; // annual rate of remission
 
+  progressions += 1; //Increment the number of progressions.
+  LTB[gid] -= 1;     //Decrement the number of Latent
+  ATB[gid] += 1;     //Increment the number of Actives
+  actives += 1;
+  latents -= 1;
 
+  A[n].tDeathTB = t + Expon(mort); // calculate calendar date til death from disease
+  A[n].tRegress = t + Expon(rreg); //calc calendar date of remission
 
-	      progressions += 1;                   //Increment the number of progressions.
-        LTB[gid] -= 1;                           //Decrement the number of Latent
-        ATB[gid] += 1;                          //Increment the number of Actives
-        actives +=1;
-        latents -=1;
+  Check_all_events(n); //Update schedule for all events
 
-
-        te = Expon(mort);           //  calculate time til death from disease
-        wd = t + te;              // calculate calendar date
-        if(wd<A[n].tDeath) {              // if before natural death
-        A[n].tDeath = wd;                  // update time of death
-      }
-      A[n].pending = pDeath;              // update pending event
-      EventSchedule(n, wd);
   return 3;
 }
 
+/*----------------------------------------------------------------------------
+Dormancy
+
+This routine is dispatched when an individual progresses from active disease to dormancy.
+
+ENTRY: 'n' indexes an individual who has just become dormant.
+       't' contains the current time.
+       dormancy is scheduled for individual 'n'.
+
+EXIT:
+       'dormancies' is incremented.
+       Counters in 'A','D' are updated.
+       death from natural causes is scheduled for individual n
+
+*/
+Regress(int n)
+{
+  int gid, st, q, s;
+  dec age, mort, wd, te;
+  A[n].tRegress = 0;
+  A[n].InFunction = fnc_Regress;
+
+  gid = A[n].groupID;    // individual's current group ID
+  A[n].state = qDTB;     // update current infection state
+  age = t - A[n].tBirth; //Compute the age at progression.
+  s = A[n].sex;
+
+  regressions += 1; //Increment the number of dormancies.
+  ATB[gid] -= 1;    //Decrement the number of Actives
+  DTB[gid] += 1;    //Increment the number of Dormants
+  actives -= 1;     //Decrement the number of Actives
+  dormants += 1;    //Increment the number of Dormants
+
+  A[n].tDeathTB = 0;
+
+  Check_all_events(n); //Update schedule for all events
+
+  return 4;
+}
+
+DeathTB(int n)
+{
+  int gid, age;
+  A[n].tDeathTB = 0;
+  A[n].InFunction = fnc_DeathTB;
+  gid = A[n].groupID;    // individual's current group ID
+  age = t - A[n].tBirth; //Compute the age at progression.
+  age1[1] += age;
+  age2[1] += age * age; //Accumulate statistics for mean
+  agec[1] += 1;         //age and its variance.
+  N[gid] -= 1;          //Decrement N[A[n].groupID][A[n].state].
+  popsize -= 1;         //updte population size
+  deathsTB += 1;        //Increment the number of deaths.
+
+  actives -= 1;
+  ATB[gid] -= 1;
+
+  BindDelete(A[n].bfrom); //remove contact links
+  BindDelete(A[n].bto);   //remove contact links
+  DetachH(n);             //Remove from the database.
+  CCdel(gid, n);          //remove individual
+  if (DTYPE == 0)         //If population size is to be held
+  {
+    n = CCadd(UK);
+    Birth(n, t); //constant, initiate a birth.
+    return 0;
+  }
+
+  return 5;
+}
 
 /*------------------------------------------------
 This finction checks the population size and increases births to keep it constant
@@ -331,26 +445,38 @@ EXIT:  If the population is < Target_pop_size: a new
 */
 Check_population_size()
 {
-	int y,j,n,i,z;
-	int grpcount,randgrp;
+  int y, j, n, i, z;
+  int grpcount, randgrp;
 
-	z=CCgroup_size(NUK)+CCgroup_size(UK);      //Current populaton size
+  z = CCgroup_size(NUK) + CCgroup_size(UK); //Current populaton size
 
-	if (z<Target_pop_size){                    //check if current population is too small
-	for (i=0;i<(Target_pop_size-z);i++){       //create (Target_pop_size-z) new individuals
-	n=CCadd(UK);
-	Birth(n,t); }}                             //Create someone born in the UK.
+  if (z < Target_pop_size)
+  { //check if current population is too small
+    for (i = 0; i < (Target_pop_size - z); i++)
+    { //create (Target_pop_size-z) new individuals
+      n = CCadd(UK);
+      Birth(n, t);
+    }
+  } //Create someone born in the UK.
 
-	if (z>Target_pop_size){                   //check if current population is too large
-	if ((z-Target_pop_size)>0){               //select (z-Target_pop_size) to repmove from the population
-	 j=0;
-  	 do{
-	  do {randgrp=Rand()*2;
-      	  n=CCsel(randgrp);} while (n==0);                     //select a random indiv from the whole population
-      	 EventCancel(n);
-      	 Death(n);                                //remove the individual via death
-      	 j++;} while (j<(z-Target_pop_size));}}
-
+  if (z > Target_pop_size)
+  { //check if current population is too large
+    if ((z - Target_pop_size) > 0)
+    { //select (z-Target_pop_size) to repmove from the population
+      j = 0;
+      do
+      {
+        do
+        {
+          randgrp = Rand() * 2;
+          n = CCsel(randgrp);
+        } while (n == 0); //select a random indiv from the whole population
+        EventCancel(n);
+        Death(n); //remove the individual via death
+        j++;
+      } while (j < (z - Target_pop_size));
+    }
+  }
 }
 /*----------------------------------------------------------------------------*
 LIFESPAN DISTRIBUTION
@@ -377,28 +503,36 @@ EXIT:  'LifeDsn' contains the *remaining* life time (years until death) for the
 
 */
 
-static int lifedsn = 1;             //Type of longevity distribution to be used.
+static int lifedsn = 1; //Type of longevity distribution to be used.
 
-dec LifeDsn(int n,int sex, dec age, dec mort)
-{ int yb, y,gid,q; dec w;
-  gid=A[n].groupID;
-  q=A[n].state;
-  switch(lifedsn)
+dec LifeDsn(int n, int sex, dec age, dec mort)
+{
+  int yb, y, gid, q;
+  dec w;
+  gid = A[n].groupID;
+  q = A[n].state;
+  switch (lifedsn)
   {
-    case 0: return 1./mort;                     //mortality
-    //case 1: return Gompertz(sex,age,mort);   //Gompertz-Makeham death.
-    case 1:                                  //Empirical life tables.
-    {  yb = (int)(t-age);                    //Get year of birth.
-       y  = yb-minBY; if(y<0) y=0.;            //Get array index for birth year.
-	if (yb<=maxBY) w = RandF(A1, M1[y][sex], 122, age);//if value if available in data file
-	else w=Expon(m1[q]);
-       return w;
-    }
-    default: Error(922.0);                   //Incorrect life span selection.
+  case 0:
+    return 1. / mort; //mortality
+  //case 1: return Gompertz(sex,age,mort);   //Gompertz-Makeham death.
+  case 1: //Empirical life tables.
+  {
+    yb = (int)(t - age); //Get year of birth.
+    y = yb - minBY;
+    if (y < 0)
+      y = 0.; //Get array index for birth year.
+    if (yb <= maxBY)
+      w = RandF(A1, M1[y][sex], 122, age); //if value if available in data file
+    else
+      w = Expon(m1[q]);
+    return w;
   }
-  return 0;                                  //(Will never reach this.)
+  default:
+    Error(922.0); //Incorrect life span selection.
+  }
+  return 0; //(Will never reach this.)
 }
-
 
 /*----------------------------------------------------------------------------*
 INITIALIZE STARTING POPULATION
@@ -423,27 +557,37 @@ EXIT:  The intial population is set up; each individual is assigned attributes
 */
 
 InitPop()
-{ int ii,a,s,i,n,st,rob,randrob,yr; dec age,wd,wh,we,wv,xs,tinf; int homl;
-dec n1981_Total=0.;
-  GroupInit();                               //Initialize groups
-ii=0;
- yr=(int)(t-t0);
+{
+  int ii, a, s, i, n, st, rob, randrob, yr;
+  dec age, wd, wh, we, wv, xs, tinf;
+  int homl;
+  dec n1981_Total = 0.;
+  GroupInit(); //Initialize groups
+  ii = 0;
+  yr = (int)(t - t0);
 
-    for(a=0; a<121; a++){                        //age
-    for(s=0; s<2;   s++){                      //sex
-    for(rob=0; rob<2; rob++){   //region of birth
-	for(i=0; i<n1981[a][s][rob]*0.1;i++){//scaled down
-	if(ii>INDIV) Error(623);          //Check population size.
-	age = a+Rand();                     //Assign age plus random bit.
-	n = CCadd(rob);                        //Add new individual
-  st = Rand()<0.00078? 1: 0;      //Assign infection status from random number generation.
+  for (a = 0; a < 121; a++)
+  { //age
+    for (s = 0; s < 2; s++)
+    { //sex
+      for (rob = 0; rob < 2; rob++)
+      { //region of birth
+        for (i = 0; i < n1981[a][s][rob] * 0.1; i++)
+        { //scaled down
+          if (ii > INDIV)
+            Error(623);                  //Check population size.
+          age = a + Rand();              //Assign age plus random bit.
+          n = CCadd(rob);                //Add new individual
+          st = Rand() < 0.00078 ? 1 : 0; //Assign infection status from random number generation.
 
-
-	ii=ii+1;
-	BasicInd(yr,n,rob,age,s,rob, st);                    //Set up basic individual.
-        EventCancel(n);
-  	Check_all_events(n);
-	}}}}
+          ii = ii + 1;
+          BasicInd(yr, n, rob, age, s, rob, st); //Set up basic individual.
+          EventCancel(n);
+          Check_all_events(n);
+        }
+      }
+    }
+  }
 }
 /*----------------------------------------------------------------------------*
 SET UP BASIC INDIVIDUAL FOR POPULATION INITIALIZATION
@@ -464,42 +608,48 @@ EXIT:   'A[n]' is in the Uninfected state and scheduled for its earliest
           event.
 
 */
-BasicInd (int yr, int n, int rob, dec age, int s, int grp, int st)
-{ dec wd, we, wv, prog;
- int q;
-  A[n].InFunction=fnc_BasicInd;
-  popsize+=1;                           //update population size
-  A[n].id = IDnew();                    //Assign unique ID number
-  AttachH(n);                           //Attach to database
-  InitAbinds(n);                        //initialize contact bindinds
-  clear_times(n);                       //Initialize times
-  A[n].v = 1;                           //Maximum probability to be chosen: Tendai
-  A[n].rob = rob;                       //Set to rob
-  A[n].groupID = grp;                   //Assign initial group
-  A[n].tBirth = t-age;                  //Assign birth time from age.
-  A[n].sex = s;                         //Assign sex.
-  A[n].state= st;                     //Initialize TB Disease state
+BasicInd(int yr, int n, int rob, dec age, int s, int grp, int st)
+{
+  dec wd, we, wv, prog;
+  int q;
+  A[n].InFunction = fnc_BasicInd;
+  popsize += 1;          //update population size
+  A[n].id = IDnew();     //Assign unique ID number
+  AttachH(n);            //Attach to database
+  InitAbinds(n);         //initialize contact bindinds
+  clear_times(n);        //Initialize times
+  A[n].v = 1;            //Maximum probability to be chosen: Tendai
+  A[n].rob = rob;        //Set to rob
+  A[n].groupID = grp;    //Assign initial group
+  A[n].tBirth = t - age; //Assign birth time from age.
+  A[n].sex = s;          //Assign sex.
+  A[n].state = st;       //Initialize TB Disease state
   prog = 0.1;
-  if(st) {                               //if state is > 0 diseased
-    latents +=1;                          // increase latent pop
-    LTB[grp] += 1;                        // in correct group
-    we = t + Expon(prog);    //  future time of progression
+  if (st)
+  {                       //if state is > 0 diseased
+    latents += 1;         // increase latent pop
+    LTB[grp] += 1;        // in correct group
+    we = t + Expon(prog); //  future time of progression
     A[n].tProgress = we;
-    if(we<t) Error(853.);                      //check for errors
-  } else {                                // otherwise
-    uninfecteds +=1;                      // increase unininfected pop
-    UTB[grp] += 1;                          //in correct group
+    if (we < t)
+      Error(853.); //check for errors
   }
-  q=A[n].state;
-  A[n].strain=0;
-  A[n].tDeath = wd = t+LifeDsn(n,s,age,m1[q]); //Assign time of death.
-  if(wd<A[n].tBirth+age) Error(612.2);          //Check death time.
-  if(wd<t) Error(850.);                      //check for errors
-  A[n].pending = wd<we? pDeath:pProgress;
+  else
+  {                   // otherwise
+    uninfecteds += 1; // increase unininfected pop
+    UTB[grp] += 1;    //in correct group
+  }
+  q = A[n].state;
+  A[n].strain = 0;
+  A[n].tDeath = wd = t + LifeDsn(n, s, age, m1[q]); //Assign time of death.
+  if (wd < A[n].tBirth + age)
+    Error(612.2); //Check death time.
+  if (wd < t)
+    Error(850.); //check for errors
+  A[n].pending = wd < we ? pDeath : pProgress;
 
   Check_all_events(n);
- }
-
+}
 
 /*----------------------------------------------------------------------------*
 REPORTING
@@ -529,23 +679,24 @@ EXIT:  The next line of the report has been printed.
 */
 
 static int ReportFirst;
-ReportInit() { ReportFirst = 0;
+ReportInit()
+{
+  ReportFirst = 0;
 } //To print headers set to 0;
 
 Report(char *prog)
 {
-  int i,j,ac,r,y,yr; dec z,age;
-  int z1,z2;
+  int i, j, ac, r, y, yr;
+  dec z, age;
+  int z1, z2;
 
   //print to screen simulation infor and output labels
-  if(ReportFirst==0)
-  { ReportFirst = 1;
+  if (ReportFirst == 0)
+  {
+    ReportFirst = 1;
     printf("Dataset:     Simulation output of program '%s'\n", prog);
     printf("Kernel:      %s\n",
-    kernel==0? "Mean field":
-    kernel==1? "Cauchy":
-    kernel==2? "Gaussian":
-                 "Unspecified");
+           kernel == 0 ? "Mean field" : kernel == 1 ? "Cauchy" : kernel == 2 ? "Gaussian" : "Unspecified");
     printf("Sequence:    %lu\n\n", rand0);
 
     EventProfile("Initial");
@@ -555,52 +706,63 @@ Report(char *prog)
     printf("Label UTB:	Number uninfected.\n");
     printf("Label LTB:	Number latently infected.\n");
     printf("Label ATB:	Number actively infected.\n");
+    printf("Label DTB:	Number dormant infections.\n");
     printf("Label Progs: Number of progressions since last report\n");
-    printf("Label Deaths:  Number of deaths since last report.\n");
+    printf("Label Regs: Number of regressions since last report\n");
+    printf("Label Deaths:  Number of non-TB deaths since last report.\n");
+    printf("Label dTB: Number of deaths from TB since last report.\n");
     printf("Label nbirths: Total number of births.\n");
     printf("Label UKborn: Total number of UK born\n");
     printf("Label NUKborn: Total number of non-UK born\n");
 
-    printf("\n t \t\t N  \t\t UTB \t LTB \t ATB \t Progs \t Deaths \tBirths \tUK \tNUK\n");
+    printf("\n t \t\t N  \t\t UTB \t LTB \t ATB \t DTB \t Progs \t Regs \t Deaths\t dTB \tBirths \tUK \tNUK\n");
   }
-    //Calculate result summarise
-    z1=CCgroup_size(UK);
-    z2=CCgroup_size(NUK);
+  //Calculate result summarise
+  z1 = CCgroup_size(UK);
+  z2 = CCgroup_size(NUK);
 
-   //Write results to screen.
-    printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d\n",
-    t, popsize, uninfecteds,latents, actives, progressions, deaths, nbirths,z1,z2);
+  //Write results to screen.
+  printf("%6.1f  \t%d	\t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d \t%d\n",
+         t, popsize, uninfecteds, latents, actives, dormants, progressions, regressions, deaths, deathsTB, nbirths, z1, z2);
 
   ///Write results to output file which is defined in Declarations.c
-  fprintf(fptr,"%.0f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
-    t, popsize, uninfecteds,latents, actives,progressions, deaths, nbirths,z1,z2);
+  fprintf(fptr, "%.0f\t%d\t%d\t%d\t%d\t%d\t%d \t%d \t%d\t%d\t%d\t%d \t%d\n",
+          t, popsize, uninfecteds, latents, actives, dormants, progressions, regressions, deaths, deathsTB, nbirths, z1, z2);
 
-  fprintf(stderr, "  %.1f\r", t);            //Update status indicator.
-  fflush(stdout); fflush(stderr);            //Make sure everything shows.
-  deaths = progressions = events =nbirths = 0;      //Clear time-step counters.
+  fprintf(stderr, "  %.1f\r", t); //Update status indicator.
+  fflush(stdout);
+  fflush(stderr);                                                        //Make sure everything shows.
+  deaths = progressions = regressions = deathsTB = events = nbirths = 0; //Clear time-step counters.
 
-
-/////////////////////////////////////////////////////////////////
-//UPDATE TIME DEPENDENT PARAMETERS VALUES
-/////////////////////////////////////////////////////////////////
-  y = (int)t;                                //Get calendar (integer) year.
-  if(y>lup){
-  if((t>=interv-1))                                  //Check to see if parameters
-  { //ypb = 1./bcy[y-(int)t0];                 //sensitive to calendar year
-    //ypi = 1./interv_nimmigrants;}//immig[y-(int)t0];               //need updating.
-  lup = y; }}
-////////////////////////////////////////////////////////////////////////
-  if((t-y)>0.3 && (t-y)<0.7 && y>1998)       //Since computation is expensive
-  {                                          //only get population sizes when
-                                             //necessary (mid-year).
-  for(j=0;j<nC;j++){
-    immid=Clowest[j+1]-Emptyc[j];
-    yr = y-(int)t0;                          //Get year array index.
-    for(i=Clowest[j]; i<immid; i++)                   //Loop through immigrants.
-    { age = t-A[i].tBirth;                   //Get age and find age class.
-      ac = age<15?0: age<45?1: age<65?2: 3; }}        //Increment correct compartment
-                                             //for this individual.
-  }}
+  /////////////////////////////////////////////////////////////////
+  //UPDATE TIME DEPENDENT PARAMETERS VALUES
+  /////////////////////////////////////////////////////////////////
+  y = (int)t; //Get calendar (integer) year.
+  if (y > lup)
+  {
+    if ((t >= interv - 1)) //Check to see if parameters
+    {                      //ypb = 1./bcy[y-(int)t0];                 //sensitive to calendar year
+      //ypi = 1./interv_nimmigrants;}//immig[y-(int)t0];               //need updating.
+      lup = y;
+    }
+  }
+  ////////////////////////////////////////////////////////////////////////
+  if ((t - y) > 0.3 && (t - y) < 0.7 && y > 1998) //Since computation is expensive
+  {                                               //only get population sizes when
+                                                  //necessary (mid-year).
+    for (j = 0; j < nC; j++)
+    {
+      immid = Clowest[j + 1] - Emptyc[j];
+      yr = y - (int)t0;                    //Get year array index.
+      for (i = Clowest[j]; i < immid; i++) //Loop through immigrants.
+      {
+        age = t - A[i].tBirth; //Get age and find age class.
+        ac = age < 15 ? 0 : age < 45 ? 1 : age < 65 ? 2 : 3;
+      }
+    } //Increment correct compartment
+      //for this individual.
+  }
+}
 
 /*----------------------------------------------------------------------------*
 CLOSURE.
@@ -621,64 +783,75 @@ EXIT:   Final statistics have been displayed.
         'out' contains the notification rates observed over the simulation.
 */
 
-static dec nstep  =  0;                      //Number of steps
-static dec tstep1 =  0;                      //Mean time step
-static dec tstep2 =  0;                      //Standard deviation in time step
-static dec tsmin  =  1E10;                   //Smallest time step
-static dec tsmax  = -1E10;                   //Largest time step
+static dec nstep = 0;     //Number of steps
+static dec tstep1 = 0;    //Mean time step
+static dec tstep2 = 0;    //Standard deviation in time step
+static dec tsmin = 1E10;  //Smallest time step
+static dec tsmax = -1E10; //Largest time step
 
-static dec trho, nrho;                       //Statistics for local dispersal.
+static dec trho, nrho; //Statistics for local dispersal.
 static dec tinfections, linfections;
-
 
 FinalInit()
 {
   nstep = tstep1 = tstep2 = 0;
-  tsmin  =  1E10; tsmax  = -1E10;
+  tsmin = 1E10;
+  tsmax = -1E10;
 
   trho = nrho = 0;
   tinfections = linfections = 0;
 }
 
 Final()
-{ int a,s,r,y,d,route,n,m,k; dec size,w;
+{
+  int a, s, r, y, d, route, n, m, k;
+  dec size, w;
   FILE *cases, *pop;
 
   printf("\n");
-  size  = (indiv+3) * sizeof(struct Indiv);  //Tendai is this linked to the psuedo individuals?
+  size = (indiv + 3) * sizeof(struct Indiv); //Tendai is this linked to the psuedo individuals?
   size += EventProfile("Final");
 
   tstepfin();
-  { printf("Time steps:      Mean %s, Min %s, Max %s, SD %s, N %.0f\n",
-            Tval(tstep1), Tval(tsmin), Tval(tsmax), Tval(tstep2), nstep); }
+  {
+    printf("Time steps:      Mean %s, Min %s, Max %s, SD %s, N %.0f\n",
+           Tval(tstep1), Tval(tsmin), Tval(tsmax), Tval(tstep2), nstep);
+  }
 
-  if(nrho)
-    printf("Dispersal:       Mean distance %.1f grid units.\n", trho/nrho);
+  if (nrho)
+    printf("Dispersal:       Mean distance %.1f grid units.\n", trho / nrho);
 
-  { printf("Infections:      Targeted %.0f, out of area %.0f, ratio %.2f%%\n",
-      tinfections, tinfections-linfections,
-      100.*(tinfections-linfections)/tinfections); }
+  {
+    printf("Infections:      Targeted %.0f, out of area %.0f, ratio %.2f%%\n",
+           tinfections, tinfections - linfections,
+           100. * (tinfections - linfections) / tinfections);
+  }
 
-  if(agec[0])
-  { age1[0] /= agec[0]; age2[0] = sqrt(age2[0]/agec[0] - age1[0]*age1[0]);
+  if (agec[0])
+  {
+    age1[0] /= agec[0];
+    age2[0] = sqrt(age2[0] / agec[0] - age1[0] * age1[0]);
     printf("All individuals: Mean age %.1f, SD %.1f, N %.0f\n",
-      age1[0], age2[0], agec[0]); }
+           age1[0], age2[0], agec[0]);
+  }
 
-  if(agec[1])
-  { age1[1] /= agec[1]; age2[1] = sqrt(age2[1]/agec[1] - age1[1]*age1[1]);
+  if (agec[1])
+  {
+    age1[1] /= agec[1];
+    age2[1] = sqrt(age2[1] / agec[1] - age1[1] * age1[1]);
     printf("Disease-free:    Mean age %.1f, SD %.1f, N %.0f\n",
-      age1[1], age2[1], agec[1]); }
+           age1[1], age2[1], agec[1]);
+  }
 
   printf("\n");
-  printf("Memory usage:    %.2f gigabytes\n", size/(1024*1024*1024));
+  printf("Memory usage:    %.2f gigabytes\n", size / (1024 * 1024 * 1024));
 
   printf("Elapsed time:    %s\n",
-    Tval((dec)(time(NULL)-startsec)/60/60/24/365.25));
+         Tval((dec)(time(NULL) - startsec) / 60 / 60 / 24 / 365.25));
   fprintf(stderr, "          \n");
-  fflush(stdout); fflush(stderr);
-
-
- }
+  fflush(stdout);
+  fflush(stderr);
+}
 /*----------------------------------------------------------------------------*
 TIMING STATISTICS
 
@@ -693,17 +866,20 @@ EXIT:  Statistics have been accumulated for the time step.
 */
 
 tstep(dec t, dec tn)
-{ dec dt;
+{
+  dec dt;
 
-  dt = tn-t;                                 //Compute the length of the step.
+  dt = tn - t; //Compute the length of the step.
 
-  tstep1 += dt;                              //Accumulate the sum and sum of
-  tstep2 += dt*dt;                           //squares.
+  tstep1 += dt;      //Accumulate the sum and sum of
+  tstep2 += dt * dt; //squares.
 
-  if(tsmin>dt) tsmin = dt;                   //Accumulate the minimum and
-  if(tsmax<dt) tsmax = dt;                   //maximum.
+  if (tsmin > dt)
+    tsmin = dt; //Accumulate the minimum and
+  if (tsmax < dt)
+    tsmax = dt; //maximum.
 
-  nstep  += 1;                               //Accumulate the count.
+  nstep += 1; //Accumulate the count.
 }
 
 /*-------------------------------------------------------------------------
@@ -723,9 +899,10 @@ because the division is by 'n', not 'n-1'.
 
 tstepfin()
 {
-  if(nstep==0) return 0;  //Tendai changed return to return 0; to avoid warnings                       //Avoid division by zero.
+  if (nstep == 0)
+    return 0;                                //Tendai changed return to return 0; to avoid warnings                       //Avoid division by zero.
   tstep1 /= nstep;                           //Compute the mean.
-  tstep2 = tstep2/nstep - tstep1*tstep1;     //Compute the variance.
+  tstep2 = tstep2 / nstep - tstep1 * tstep1; //Compute the variance.
   tstep2 = sqrt(tstep2);                     //Convert to root-variance.
 }
 /*----------------------------------------------------------------------------*
@@ -746,16 +923,17 @@ EXIT:  The routine returns if the table appears to be correct. If not, an error
 */
 
 int monotone(dec p[], int n, int b, int r1, int r2)
-{ int i;
+{
+  int i;
 
-  for(i=1; i<n; i++)                         //Make sure the sequence never
-    if(p[i-1]>p[i])                          //decreases.
-      Error3(621., "`",r1, "` ",r2, "` ",i);
+  for (i = 1; i < n; i++) //Make sure the sequence never
+    if (p[i - 1] > p[i])  //decreases.
+      Error3(621., "`", r1, "` ", r2, "` ", i);
 
-  if(b && (p[0]!=0||p[n-1]!=1))              //If requested, make sure it begins
-    Error2(622., "`",r1, "` ",r2);           //with 0 and ends with 1.
+  if (b && (p[0] != 0 || p[n - 1] != 1)) //If requested, make sure it begins
+    Error2(622., "`", r1, "` ", r2);     //with 0 and ends with 1.
 
-  return 0;                                  //(Will never reach this).
+  return 0; //(Will never reach this).
 }
 
 /*----------------------------------------------------------------------------*
@@ -763,14 +941,13 @@ SERVICE ROUTINES
 These are parameter values that can be externally define/fed into the simulation
 */
 
-char *pntab[] =                              //Table of parameter names.
-{ "my_id_0","currentrun","fnumber", "randseq", 0 };
+char *pntab[] = //Table of parameter names.
+    {"my_id_0", "currentrun", "fnumber", "randseq", 0};
 
-dec *patab[] =                               //Table of parameter addresses.
-{ &my_id_0, &currentrun, &fnumber, &randseq, 0 };
+dec *patab[] = //Table of parameter addresses.
+    {&my_id_0, &currentrun, &fnumber, &randseq, 0};
 
 #include "service.c"
-
 
 /*============================================================================*
 NOTES
